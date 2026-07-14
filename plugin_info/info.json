@@ -1,0 +1,37 @@
+{
+	"id" : "mammotion",
+	"name" : "Mammotion",
+	"description" : {
+		"fr_FR" : "Ce plugin vous permet de piloter vos robots tondeuses (Luba, Yuka) et robots piscine (Spino) de la marque Mammotion, au même titre que l'application officielle. Vous retrouverez les principales fonctionnalités : état du robot / batterie / progression de la tonte / lancement, pause et arrêt / retour à la station / hauteur de lame / vitesse / tonte par zone. La remontée des données est automatique et en temps réel (MQTT)."
+	},
+	"licence" : "AGPL",
+	"author" : "Xav-74",
+	"require" : "4.4",
+	"os": {
+		"min": 11
+	},
+	"category" : "devicecommunication",
+	"hasDependency" : true,
+	"hasOwnDeamon" : true,
+	"maxDependancyInstallTime" : 60,
+	"changelog" : "https://xav-74.github.io/Documentation/mammotion/#language#/changelog",
+	"changelog_beta": "https://xav-74.github.io/Documentation/mammotion/#language#/changelog",
+	"documentation" : "https://xav-74.github.io/Documentation/mammotion/#language#/",
+	"documentation_beta": "https://xav-74.github.io/Documentation/mammotion/#language#/",
+	"link" : {
+		"forum" : "",
+		"video" : ""
+	},
+	"language" : [
+		"fr_FR"
+	],
+	"compatibility" : [
+		"smart",
+		"atlas",
+		"luna",
+		"rpi",
+		"docker",
+		"diy",
+		"v4"
+	]
+}
