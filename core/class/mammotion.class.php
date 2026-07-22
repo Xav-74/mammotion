@@ -348,6 +348,8 @@ class mammotion extends eqLogic {
 			$order++;
 			$this->createCmd('charging', 'En charge', $order, 'info', 'binary');
 			$order++;
+			$this->createCmd('docked', 'Sur la base', $order, 'info', 'binary');
+			$order++;
 			$this->createCmd('work_progress', 'Progression', $order, 'info', 'numeric', 1, 1);
 			$order++;
 			$this->createCmd('work_area', 'Surface tondue', $order, 'info', 'numeric');
@@ -435,6 +437,7 @@ class mammotion extends eqLogic {
     public function postRemove()
 	{
     }
+
 
 	/* Non obligatoire mais ca permet de déclencher une action après modification de variable de configuration
     public static function postConfig_<Variable>() {

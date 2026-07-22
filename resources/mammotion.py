@@ -315,6 +315,7 @@ class MammotionDaemon(BaseDaemon):
                 'online': int(device.online),
                 'battery': rpt.dev.battery_val,
                 'charging': int(rpt.dev.charge_state in (1, 2)),
+                'docked': int(rpt.dev.charge_state != 0),
                 'work_mode': device_mode(rpt.dev.sys_status),
                 'connect_type': device_connection(rpt.connect),
                 'work_progress': rpt.work.mow_percent,
