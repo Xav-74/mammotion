@@ -321,7 +321,7 @@ class MammotionDaemon(BaseDaemon):
                 'work_area': rpt.work.area_mowed,
                 'left_time': rpt.work.progress >> 16,
                 'elapsed_time': max(0, (rpt.work.progress & 0xFFFF) - (rpt.work.progress >> 16)),
-                'blade_height': rpt.work.knife_height or device.work.knife_height,
+                'blade_height': rpt.work.knife_height,
                 'speed': rpt.work.man_run_speed / 100,
                 'blade_status': int(device.mower_state.blade_status),
                 'rain_detection': int(device.mower_state.rain_detection),
@@ -337,6 +337,8 @@ class MammotionDaemon(BaseDaemon):
             }
             if event:
                 data['last_event'] = event
+            if not data['firmware']:
+                data.pop('firmware')
 
         self._logger.debug(f"Sending state to Jeedom for {name} : {data}")
         await self.send_to_jeedom({'event': 'state', 'device': name, 'data': data})
@@ -380,7 +382,7 @@ class MammotionDaemon(BaseDaemon):
         if device.report_data.dev.collector_status.collector_installation_status == 0:
             settings.is_dump = False
         if DeviceType.is_yuka(name):
-            settings.blade_height = -10
+            settings.blade_height = device.report_data.work.knife_height or 70
 
         route = GenerateRouteInformation(
             one_hashs=settings.areas,
@@ -404,7 +406,7 @@ class MammotionDaemon(BaseDaemon):
 
         self._logger.info(f"Planning route for {name} (areas : {settings.areas}) and starting job")
         await self._client.send_command_and_wait(name, 'generate_route_information', 'bidire_reqconver_path', generate_route_information=route)
-        await self._client.send_command_and_wait(name, 'start_job', 'zone_start_precent_t')
+        await self._client.send_command_and_wait(name, 'start_job', 'todev_taskctrl_ack')
 
 
 MammotionDaemon().run()
