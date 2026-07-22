@@ -1,0 +1,170 @@
+.mammotion_widget_flat .container-fluid {
+	margin : 3px 3px 3px 3px !important;
+	padding : 0px 0px 0px 0px !important;
+}
+
+.mammotion_widget_flat #column {
+    margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+}
+
+.mammotion_widget_flat #tile {
+    margin : 3px 3px 3px 3px !important;
+	padding : 0px 0px 0px 0px !important;
+	background-color : rgb(var(--bg-color)) !important;
+	filter : contrast(80%);
+	border : solid;
+	border-width : 2px;
+	border-radius : 10px;
+	border-color : rgb(30,30,30);
+}
+
+.mammotion_widget_flat #picture {
+	display : flex;
+	justify-content : center;
+	height: 240px;
+	margin-top: -32px
+}
+
+.mammotion_widget_flat #icon_tile {
+	display: flex;
+    align-items: center;
+    justify-content: center;
+	margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+	color: rgb(80,120,170) !important;
+}
+
+.mammotion_widget_flat #text_tile {
+	display: flex;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+	margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+}
+
+.mammotion_widget_flat #titre_tile {
+	font-size : 14px;
+	color : var(--txt-color) !important;
+	text-align : left;
+	margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+	font-weight : bold;
+}
+
+.mammotion_widget_flat #value_tile {
+	font-size : 12px;
+	color : var(--txt-color) !important;
+	text-align : left;
+	margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+}
+
+.mammotion_widget_flat #icon_tile_2 {
+	display: flex;
+    align-items: center;
+    margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+	color: rgb(80,120,170) !important;
+}
+
+.mammotion_widget_flat #text_tile_2 {
+	display: flex;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+	margin : 0px 0px 0px 0px !important;
+	padding : 5px 15px 0px 15px !important;
+}
+
+.mammotion_widget_flat #titre_tile_2 {
+	font-size : 14px;
+	color : var(--txt-color) !important;
+	text-align : left;
+	margin : 0px 0px 0px 0px !important;
+	padding : 10px 10px 10px 15px !important;
+	font-weight : bold;
+}
+
+.mammotion_widget_flat #value_tile_2 {
+	font-size : 12px;
+	color : var(--txt-color) !important;
+	text-align : left;
+	margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+}
+
+.mammotion_widget_flat .mammotion_progress-container{
+    height : 25px;
+	margin-top : 5px !important;
+	margin-bottom : 25px !important;
+}
+
+.mammotion_widget_flat .mammotion_line{
+    display : flex;
+    font-size : 12px;
+	padding : 0px 0px 0px 0px !important;
+}
+
+.mammotion_widget_flat .mammotion_progress{
+    width: 100%;
+    height: 10px;
+    background : rgb(var(--bg-color)) !important;
+	filter : contrast(75%);
+	border-radius : 5px;
+    overflow : hidden;
+}
+
+.mammotion_widget_flat .mammotion_progress-bar{
+    height : 10px;
+    background : var(--txt-color);
+	border-radius : 5px;
+    overflow : hidden;
+}
+
+.mammotion_widget_flat #mammotion_btn {
+	border : 1px solid var(--txt-color) !important;
+	border-radius : 10px !important;
+	margin : 3px 3px 3px 3px !important;
+	background-color : rgb(var(--bg-color)) !important;
+	filter : contrast(90%);
+	width : 45px; 
+}
+
+.mammotion_widget_flat .mammotion_select_wrapper {
+	position : relative;
+	display : inline-block;
+	border : 1px solid var(--txt-color);
+	border-radius : 10px;
+	margin : 3px 3px 3px 3px !important;
+	background-color : rgb(var(--bg-color)) !important;
+	filter : contrast(90%);
+	width : 45px;
+	height : 30px;
+	cursor : pointer;
+}
+
+.mammotion_widget_flat .mammotion_select_wrapper i {
+	position : absolute;
+	top : 0; left : 0; right : 0; bottom : 0;
+	display : flex;
+	align-items : center;
+	justify-content : center;
+	pointer-events : none;
+}
+
+.mammotion_widget_flat .mammotion_select {
+	position : absolute;
+	top : 0; left : 0;
+	width : 300%;
+	height : 100%;
+	opacity : 0;
+	cursor : pointer;
+}
+
+.mammotion_widget_flat #last_update {
+	font-size : 11px;
+	text-align : center;
+    margin : 5px 0px 0px 0px !important;
+}

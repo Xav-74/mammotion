@@ -1,0 +1,276 @@
+<div id="mammotion_widget_flat_ID" class="eqLogic-widget eqLogic noResize mammotion_widget_flat mammotion_widget_flat_#id# mammotion" style="min-width:858px !important; max-width:858px !important; min-height:340px; max-height:340px; text-align:center; border:#border#; border-radius:#border-radius#; background-color:#background-color#; color:#color#; #style#;" data-eqType="#eqType#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="dashboard">
+
+	<div class="text-center widget-name">
+		<span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+		<a href="#eqLink#" class="reportModeHidden" style="color:var(--eqTitle-color)!important;">#name_display# <span class="object_name">#object_name#</span></a>
+	   	<span class="cmd refresh pull-right cursor" title="{{Rafraichir}}" data-cmd_id="#refresh_id#" onclick="jeedom.cmd.execute({id: #refresh_id#});">
+		   <i class="fas fa-sync" style="color:var(--eqTitle-color)!important;"></i>
+	   	</span>
+	</div>
+			
+	<div class="container-fluid">
+		
+		<div>
+			
+			<!-- Column N°1 -->
+			<div class="col-xs-4 column_1#id#" id="column" style="width:400px;">
+				
+				<div class="col-xs-6" id="tile" style="height:186px; width: 394px;">
+					<div id="picture" style="width:394px;"> 
+						<img id="img#id#"/>
+					</div>
+				</div>
+
+				<div class="col-xs-6" id="tile" style="height:90px; width: 394px;">
+					<div class="col-xs-2" id="icon_tile" style="height:85px;"><i class="fas fa-robot"></i></div>
+					<div class="col-xs-5" id="text_tile" style="height:85px;">
+						<div class="col-xs-12" id="titre_tile"><span>#device_name#id##</span></div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#docked_id#"></span></div>
+					</div>
+					<div class="col-xs-5" id="text_tile" style="height:86px;">
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#start_id#" title="{{Démarrer}}" onclick="jeedom.cmd.execute({id: #start_id#});"><i class="fa-lg icon fas fa-play"></i></button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#pause_id#" title="{{Pause}}" onclick="jeedom.cmd.execute({id: #pause_id#});"><i class="fa-lg icon fas fa-pause"></i></button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#resume_id#" title="{{Reprendre}}" onclick="jeedom.cmd.execute({id: #resume_id#});"><i class="fa-lg icon fas fa-redo-alt"></i></button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#cancel_id#" title="{{Annuler}}" onclick="jeedom.cmd.execute({id: #cancel_id#});"><i class="fa-lg icon fas fa-times"></i></button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#dock_id#" title="{{Retour station}}" onclick="jeedom.cmd.execute({id: #dock_id#});"><i class="fa-lg icon fas fa-home"></i></button>
+						<div class="mammotion_select_wrapper">
+							<i class="fa-lg icon fas fa-map-marked-alt"></i>
+							<select class="cmd selectCmd action mammotion_select" data-cmd_id="#start_zone_id#" title="Tondre une zone" onchange="jeedom.cmd.execute({id: #start_zone_id#, options: {select: this.value}}); this.selectedIndex=0;">#start_zone_listValue#</select>
+						</div>						
+					</div>
+				</div>
+
+			</div>
+
+			<!-- Column N°2 -->
+			<div class="col-xs-4 column_1#id#" id="column" style="width:452px;">
+				
+				<div class="col-xs-6" id="tile" style="height:60px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:55px;"><span class="Ico#charging_id#"></span></div>
+					<div class="col-xs-9" id="text_tile" style="height:55px;">
+						<div class="col-xs-12" id="titre_tile">{{Batterie}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#battery_id#"></span><span class="Cmd#charging_id#"></span></div>
+					</div>
+				</div>
+				
+				<div class="col-xs-6" id="tile" style="height:60px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:55px;"><i class="fas fa-wifi"></i></div>
+					<div class="col-xs-9" id="text_tile" style="height:55px;">
+						<div class="col-xs-12" id="titre_tile">{{Connexion}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#connect_type_id#"></span><span class="Cmd#wifi_rssi_id#"></span></div>
+					</div>
+				</div>
+				
+				<div class="col-xs-6" id="tile" style="height:60px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:55px;"><i class="fas fa-info"></i></div>
+					<div class="col-xs-9" id="text_tile" style="height:55px;">
+						<div class="col-xs-12" id="titre_tile">{{Statut}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#last_event_id#"></span></div>
+					</div>				
+				</div>
+				
+				<div class="col-xs-6" id="tile" style="height:60px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:55px;"><i class="fas fa-ruler"></i></div>
+					<div class="col-xs-9" id="text_tile" style="height:55px;">
+						<div class="col-xs-12" id="titre_tile">{{Hauteur de lames}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#blade_height_id#"></span></div>
+					</div>				
+				</div>
+
+				<div class="col-xs-12" id="tile" style="height:150px; width: 446px;">
+					<div class="col-xs-12" id="titre_tile_2">{{Tonte}}</div>
+					<div class="col-xs-12 mammotion_progress-container">
+						<div class="col-xs-12 mammotion_line" style="justify-content: left">
+							<span>{{Progression}}&nbsp;&nbsp;</span>
+							<span class="Cmd#work_progress_id#"></span>
+						</div>
+						<div class="mammotion_progress" id="mammotion_progress_1">
+							<div class="mammotion_progress-bar"></div>
+						</div>
+					</div>
+					<div class="col-xs-12" id="text_tile_2">
+						<div class="col-xs-1" id="icon_tile_2"><i class="fas fa-chart-area"></i></div>
+						<div class="col-xs-5" id="value_tile_2">{{Surface à tondre : }}<span class="Cmd#work_area_id#"></span></div>
+						<div class="col-xs-1" id="icon_tile_2"><i class="fas fa-tachometer-alt"></i></div>
+						<div class="col-xs-5" id="value_tile_2">{{Vitesse : }}<span class="Cmd#speed_id#"></span></div>
+					</div>
+					<div class="col-xs-12" id="text_tile_2">
+						<div class="col-xs-1" id="icon_tile_2"><i class="far fa-clock"></i></div>
+						<div class="col-xs-5" id="value_tile_2">{{Temps restant : }}<span class="Cmd#left_time_id#"></span></div>
+						<div class="col-xs-1" id="icon_tile_2"><i class="fas fa-history"></i></div>
+						<div class="col-xs-5" id="value_tile_2">{{Temps écoulé : }}<span class="Cmd#elapsed_time_id#"></span></div>
+					</div>				
+				</div>
+							
+			</div>
+
+		</div>
+
+		<div class="col-xs-12" style="height:25px;">
+			<div id="last_update">{{Dernière mise à jour : }}<span class="Cmd#lastUpdate_id#"></span></div>
+		</div>
+		
+	</div>
+	
+	#divGraphInfo#
+	
+	<script>
+
+		//----- Theme colors & optional parameters
+		function setTheme#id#() {
+			var link = document.createElement('link');
+			link.type = 'text/css';
+			link.rel = 'stylesheet';
+			
+			if ($('body').attr('data-theme').endsWith('Dark')) {
+				link.href = 'plugins/mammotion/core/template/dashboard/mammotion_dashboard_style_dark.css';
+			}
+			else if ($('body').attr('data-theme').endsWith('Light')) {
+				link.href = 'plugins/mammotion/core/template/dashboard/mammotion_dashboard_style_light.css';
+			}
+			document.head.appendChild(link);
+		}
+
+		//----- Events
+		$('body').on('changeThemeEvent', function (event,theme) {
+			setTheme#id#();
+		});
+
+		//----- Initialization
+		function timedSetTheme#id#(occurence = 0){
+			if ($('.mammotion_widget_flat_#id#').length == 0) {
+				return;
+			}
+			if ( $('body')[0].hasAttribute('data-theme') != true )  {
+				occurence++;
+				if (occurence > 40){
+					return;
+				}
+				setTimeout( () => { timedSetTheme#id#(occurence); }, 500 );
+				return;
+			}
+			setTheme#id#();
+			updateImage#id#();
+			updateDisplayDashboard#id#();
+		}
+		
+		if ( $('body')[0].hasAttribute('data-theme') == true )  {
+			setTheme#id#();
+			updateImage#id#();
+			updateDisplayDashboard#id#();
+		}
+		else  {
+			timedSetTheme#id#(0);
+		}
+
+
+		//----- Image
+		function updateImage#id#()  {
+			var image = '';
+			var device = ('#device_name#id##' || '').toLowerCase();
+			['yuka', 'luba', 'spino'].forEach(function (family) {
+				if (!image && device.indexOf(family) !== -1) {
+					image = 'plugins/mammotion/data/mammotion_' + family + '.png';
+				}
+			});
+		
+			var img = document.getElementById('img#id#');
+			img.onerror = function() {
+				this.onerror = null;
+				this.src = 'plugins/mammotion/data/image_robot_not_found.png';
+			};
+			img.src = image || 'plugins/mammotion/data/image_robot_not_found.png';
+		}
+
+
+		//----- Dashboard display update
+		function updateDisplayDashboard#id#()  {
+	
+			//----- Base
+			jeedom.cmd.update['#docked_id#'] =function(_options) {
+				if ( _options.display_value == 1 )  {
+					$('.Cmd#docked_id#').empty().append('<span>'+'Sur la base'+'</span>');
+				}
+				else  {
+					$('.Cmd#docked_id#').empty().append('<span>'+'Hors de la base'+'</span>');
+				}
+			}
+			jeedom.cmd.update['#docked_id#']({display_value: '#docked#'});
+
+			//----- Battery
+			jeedom.cmd.update['#battery_id#'] =function(_options) {
+				$('.Cmd#battery_id#').empty().append('<span>'+_options.display_value+' %</span>');
+			}
+			jeedom.cmd.update['#battery_id#']({display_value: '#battery#'});
+
+			jeedom.cmd.update['#charging_id#'] =function(_options) {
+				if ( _options.display_value == 1 )  {
+					$('.Ico#charging_id#').empty().append('<span><i class="fas fa-plug"></i></span>');
+					$('.Cmd#charging_id#').empty().append('<span>&nbsp;&nbsp;(en charge)</span>');
+				}
+				else  {
+					$('.Ico#charging_id#').empty().append('<span><i class="fas fa-battery-half"></i></span>');
+					$('.Cmd#charging_id#').empty().append('<span></span>');
+				}
+			}
+			jeedom.cmd.update['#charging_id#']({display_value: '#charging#'});
+
+			//----- Connexion
+			jeedom.cmd.update['#connect_type_id#'] =function(_options) {
+				$('.Cmd#connect_type_id#').empty().append('<span>'+_options.display_value+' </span>');
+			}
+			jeedom.cmd.update['#connect_type_id#']({display_value: '#connect_type#'});
+
+			jeedom.cmd.update['#wifi_rssi_id#'] =function(_options) {
+				$('.Cmd#wifi_rssi_id#').empty().append('<span>&nbsp;&nbsp;('+_options.display_value+' dBm)</span>');
+			}
+			jeedom.cmd.update['#wifi_rssi_id#']({display_value: '#wifi_rssi#'});
+
+			//----- Statut
+			jeedom.cmd.update['#last_event_id#'] =function(_options) {
+				$('.Cmd#last_event_id#').empty().append('<span>'+_options.display_value+'</span>');
+			}
+			jeedom.cmd.update['#last_event_id#']({display_value: '#last_event#'});
+
+			jeedom.cmd.update['#blade_height_id#'] =function(_options) {
+				$('.Cmd#blade_height_id#').empty().append('<span>'+_options.display_value+' mm</span>');
+			}
+			jeedom.cmd.update['#blade_height_id#']({display_value: '#blade_height#'});
+
+			//----- Mowing
+			jeedom.cmd.update['#work_progress_id#'] =function(_options) {
+				$('.Cmd#work_progress_id#').empty().append('<span>('+_options.display_value+' %)</span>');
+				$('#mammotion_progress_1').empty().append('<div class="mammotion_progress-bar" style="width: '+_options.display_value+'%"></div>');
+			}
+			jeedom.cmd.update['#work_progress_id#']({display_value: '#work_progress#'});
+
+			jeedom.cmd.update['#work_area_id#'] =function(_options) {
+				$('.Cmd#work_area_id#').empty().append('<span>'+_options.display_value+' m²</span>');
+			}
+			jeedom.cmd.update['#work_area_id#']({display_value: '#work_area#'});
+
+			jeedom.cmd.update['#speed_id#'] =function(_options) {
+				$('.Cmd#speed_id#').empty().append('<span>'+_options.display_value+' m/s</span>');
+			}
+			jeedom.cmd.update['#speed_id#']({display_value: '#speed#'});
+
+			jeedom.cmd.update['#left_time_id#'] =function(_options) {
+				$('.Cmd#left_time_id#').empty().append('<span>'+_options.display_value+' min</span>');
+			}
+			jeedom.cmd.update['#left_time_id#']({display_value: '#left_time#'});
+
+			jeedom.cmd.update['#elapsed_time_id#'] =function(_options) {
+				$('.Cmd#elapsed_time_id#').empty().append('<span>'+_options.display_value+' min</span>');
+			}
+			jeedom.cmd.update['#elapsed_time_id#']({display_value: '#elapsed_time#'});
+			
+			//----- Last update
+			jeedom.cmd.update['#lastUpdate_id#'] = function(_options) {
+				$('.Cmd#lastUpdate_id#').empty().append('<span>'+_options.display_value+'</span>');
+			}
+			jeedom.cmd.update['#lastUpdate_id#']({display_value:'#lastUpdate#'});
+		}	
+
+	</script>
+
+</div>

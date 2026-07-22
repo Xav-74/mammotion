@@ -376,11 +376,11 @@ class mammotion extends eqLogic {
 			$order++;
 			$this->createCmd('total_work_time', 'Temps de travail total', $order, 'info', 'numeric');
 			$order++;
-			$this->createCmd('bat_cycles', 'Cycles batterie', $order, 'info', 'numeric', 0);
+			$this->createCmd('bat_cycles', 'Cycles batterie', $order, 'info', 'numeric');
 			$order++;
-			$this->createCmd('firmware', 'Firmware', $order, 'info', 'string', 0);
+			$this->createCmd('firmware', 'Firmware', $order, 'info', 'string');
 			$order++;
-			$this->createCmd('error', 'Erreurs', $order, 'info', 'string', 0);
+			$this->createCmd('error', 'Erreurs', $order, 'info', 'string');
 			$order++;
 			$this->createCmd('connect_type', 'Connexion', $order, 'info', 'string');
 			$order++;
@@ -438,6 +438,61 @@ class mammotion extends eqLogic {
 	{
     }
 
+    /* Non obligatoire mais permet de modifier l'affichage du widget si vous en avez besoin */
+    public function toHtml($_version = 'dashboard') {
+    	
+		if ( $this->getConfiguration('device_type') != 'mower') {
+			return parent::toHtml($_version);
+		}
+
+		$this->emptyCacheWidget(); 		//vide le cache. Pratique pour le développement
+				
+		$replace = $this->preToHtml($_version);
+		if (!is_array($replace)) {
+			return $replace;
+		}
+		
+		$version = jeedom::versionAlias($_version);
+		$replace['#version#'] = $_version;
+
+		//Traitement des des options de configuration
+		$replace['#device_name'.$this->getId().'#'] = $this->getConfiguration('device_name');
+				
+		// Traitement des commandes infos
+		foreach ($this->getCmd('info') as $cmd) {
+			$replace['#' . $cmd->getLogicalId() . '_id#'] = $cmd->getId();
+			$replace['#' . $cmd->getLogicalId() . '_name#'] = $cmd->getName();
+			$replace['#' . $cmd->getLogicalId() . '#'] = $cmd->execCmd();
+			$replace['#' . $cmd->getLogicalId() . '_visible#'] = $cmd->getIsVisible();
+			$replace['#' . $cmd->getLogicalId() . '_collect#'] = $cmd->getCollectDate();
+			if ($cmd->getIsHistorized() == 1) { $replace['#' . $cmd->getLogicalId() . '_history#'] = 'history cursor'; }
+		}
+
+		// Traitement des commandes actions
+		foreach ($this->getCmd('action') as $cmd) {
+			$replace['#' . $cmd->getLogicalId() . '_id#'] = $cmd->getId();
+			$replace['#' . $cmd->getLogicalId() . '_visible#'] = $cmd->getIsVisible();
+			if ($cmd->getSubType() == 'select') {
+				$listValue = '<option value="" disabled selected>' . 'Aucune' . '</option>';
+				$listValueArray = explode(';', $cmd->getConfiguration('listValue'));
+				foreach ($listValueArray as $value) {
+					if (strpos($value, '|') === false) { continue; }
+					list($id, $name) = explode('|', $value);
+					$listValue = $listValue . '<option value="' . $id . '">' . $name . '</option>';
+				}
+				$replace['#' . $cmd->getLogicalId() . '_listValue#'] = $listValue;
+			}
+		}
+		
+		// On definit le template à appliquer
+		$template = 'mammotion_mower_dashboard_flatdesign';
+		$replace['#template#'] = $template;
+
+		$filepath = 'plugins/'.__CLASS__.'/core/template/'.$version.'/'.$template.'.html';
+       	$html = template_replace($replace, getTemplate('core', $version, $template, 'mammotion'));
+       	$html = translate::exec($html, $filepath);
+   		return $this->postToHtml($_version, $html);
+	}
 
 	/* Non obligatoire mais ca permet de déclencher une action après modification de variable de configuration
     public static function postConfig_<Variable>() {
