@@ -1,5 +1,9 @@
 import asyncio
+import ssl
 import time
+
+if not hasattr(ssl, 'OP_IGNORE_UNEXPECTED_EOF'):
+    ssl.OP_IGNORE_UNEXPECTED_EOF = 0
 
 from jeedomdaemon import BaseDaemon, BaseConfig
 
@@ -7,6 +11,7 @@ from pymammotion.aliyun.exceptions import CheckSessionException, DeviceOfflineEx
 from pymammotion.client import MammotionClient
 from pymammotion.data.model import GenerateRouteInformation
 from pymammotion.data.model.device_config import OperationSettings, create_path_order
+from pymammotion.data.model.pool_state import SpinoWorkMode
 from pymammotion.transport.base import CommandTimeoutError
 from pymammotion.utility.constant.device_constant import WorkMode, device_connection, device_mode
 from pymammotion.utility.device_type import DeviceType
