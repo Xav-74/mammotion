@@ -35,7 +35,7 @@
 						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#dock_id#" title="{{Retour station}}" onclick="jeedom.cmd.execute({id: #dock_id#});"><i class="fa-lg icon fas fa-home"></i></button>
 						<div class="mammotion_select_wrapper">
 							<i class="fa-lg icon fas fa-map-marked-alt"></i>
-							<select class="cmd selectCmd action mammotion_select" data-cmd_id="#start_zone_id#" title="Tondre une zone" onchange="jeedom.cmd.execute({id: #start_zone_id#, options: {select: this.value}}); this.selectedIndex=0;">#start_zone_listValue#</select>
+							<select class="cmd selectCmd action mammotion_select" data-cmd_id="#start_zone_id#" title="Tondre une zone" onchange="jeedom.cmd.execute({id: #start_zone_id#, value: {select: this.value}}); this.selectedIndex=0;">#start_zone_listValue#</select>
 						</div>						
 					</div>
 				</div>
