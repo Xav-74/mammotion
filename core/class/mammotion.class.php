@@ -354,6 +354,8 @@ class mammotion extends eqLogic {
 			$order++;
 			$this->createCmd('work_area', 'Surface tondue', $order, 'info', 'numeric');
 			$order++;
+			$this->createCmd('current_area', 'Zone courante', $order, 'info', 'string');
+			$order++;
 			$this->createCmd('left_time', 'Temps restant', $order, 'info', 'numeric');
 			$order++;
 			$this->createCmd('elapsed_time', 'Temps écoulé', $order, 'info', 'numeric');
@@ -402,6 +404,8 @@ class mammotion extends eqLogic {
 			$this->createCmd('leave_dock', 'Quitter la station', $order, 'action', 'other');
 			$order++;
 			$this->createCmd('start_zone', 'Tondre une zone', $order, 'action', 'select');
+			$order++;
+			$this->createCmd('start_activity', 'Lancer une activité', $order, 'action', 'select');
 			$order++;
 			
 			// Réglages hauteur de lame / vitesse : non supportés par la gamme Yuka
@@ -562,6 +566,24 @@ class mammotion extends eqLogic {
 		log::add('mammotion', 'debug', 'Areas updated for '.$this->getName().' : '.json_encode($areas));
 	}
 
+	/* Mise à jour de la liste des activités (commande select start_activity) */
+	public function handlePlans($plans)
+	{
+		$listValue = array();
+		foreach ($plans as $plan) {
+			$listValue[] = $plan['plan_id'].'|'.$plan['name'];
+		}
+		$this->setConfiguration('plans', implode(';', $listValue));
+		$this->save(true);
+
+		$cmd = $this->getCmd(null, 'start_activity');
+		if (is_object($cmd)) {
+			$cmd->setConfiguration('listValue', implode(';', $listValue));
+			$cmd->save();
+		}
+		log::add('mammotion', 'debug', 'Plans updated for '.$this->getName().' : '.json_encode($plans));
+	}
+
 	public function sendNotification($event) {
 
         // Information
@@ -632,6 +654,10 @@ class mammotionCmd extends cmd {
 
 			case 'start_zone':
 				mammotion::sendToDaemon('start', $device, array('hash' => $_options['select']));
+				break;
+
+			case 'start_activity':
+				mammotion::sendToDaemon('start_plan', $device, array('plan_id' => $_options['select']));
 				break;
 
 			case 'set_blade_height':

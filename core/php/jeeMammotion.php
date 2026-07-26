@@ -54,6 +54,12 @@ try
                 $eqLogic->handleAreas($message['data']);
             }
         }
+        elseif (isset($message['event']) && $message['event'] == 'plans') {
+            $eqLogic = mammotion::getMammotionEqLogic($message['device']);
+            if (is_object($eqLogic)) {
+                $eqLogic->handlePlans($message['data']);
+            }
+        }
     }
 
     echo 'OK';

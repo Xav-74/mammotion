@@ -108,6 +108,9 @@ class MammotionDaemon(BaseDaemon):
                 else:
                     await self._start(device, args.get('hash'))
 
+            elif action == 'start_plan':
+                await self._client.send_command_and_wait(device, 'single_schedule', 'todev_planjob_set', plan_id=args['plan_id'])
+
             elif action == 'command':
                 self._logger.info(f"Command {args['key']} for {device} : {args.get('kwargs') or {}}")
                 await self._command(device, args['key'], args.get('kwargs') or {})
@@ -148,6 +151,7 @@ class MammotionDaemon(BaseDaemon):
     def _make_map_handler(self, name: str):
         async def _handler():
             await self._send_areas(name)
+            await self._send_plans(name)
         return _handler
 
 
@@ -275,6 +279,14 @@ class MammotionDaemon(BaseDaemon):
         await self.send_to_jeedom({'event': 'areas', 'device': name, 'data': areas})
 
 
+    async def _send_plans(self, name: str):
+        # Activités (plans) créées par l'utilisateur dans l'application
+        device = self._client.get_device_by_name(name)
+        plans = [{'plan_id': p.plan_id, 'name': p.task_name or p.plan_id} for p in device.map.plan.values()]
+        self._logger.info(f"Sending plans to Jeedom for {name} : {[p['name'] for p in plans]}")
+        await self.send_to_jeedom({'event': 'plans', 'device': name, 'data': plans})
+
+
     async def _send_state(self, name: str):
         now = time.monotonic()
         if now - self._last_sent.get(name, 0) < STATE_THROTTLE:
@@ -320,6 +332,7 @@ class MammotionDaemon(BaseDaemon):
                 'connect_type': device_connection(rpt.connect),
                 'work_progress': rpt.work.mow_percent,
                 'work_area': rpt.work.area_mowed,
+                'current_area': next((a.name for a in device.map.area_name if a.hash == (rpt.locations[0].bol_hash if rpt.locations else 0)), ''),
                 'left_time': rpt.work.progress >> 16,
                 'elapsed_time': max(0, (rpt.work.progress & 0xFFFF) - (rpt.work.progress >> 16)),
                 'blade_height': rpt.work.knife_height,
@@ -370,6 +383,14 @@ class MammotionDaemon(BaseDaemon):
             await self._client.send_command_and_wait(name, 'query_generate_route_information', 'bidire_reqconver_path')
             await self._client.send_command_with_args(name, 'start_job')
             return
+
+        # Aucune reprise en cours et pas de zone imposée -> lancer l'activité par défaut
+        if area_hash is None:
+            default_plan = next((p for p in device.map.plan.values() if p.is_enabled()), None)
+            if default_plan is not None:
+                self._logger.info(f"Starting default activity '{default_plan.task_name}' for {name}")
+                await self._client.send_command_and_wait(name, 'single_schedule', 'todev_planjob_set', plan_id=default_plan.plan_id)
+                return
 
         # Nouvelle tâche -> planification de la route puis démarrage
         settings = OperationSettings()
