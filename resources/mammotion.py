@@ -404,7 +404,7 @@ class MammotionDaemon(BaseDaemon):
         if device.report_data.dev.collector_status.collector_installation_status == 0:
             settings.is_dump = False
         if DeviceType.is_yuka(name):
-            settings.blade_height = device.report_data.work.knife_height or 70
+            settings.blade_height = -10
 
         route = GenerateRouteInformation(
             one_hashs=settings.areas,
