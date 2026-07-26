@@ -31,7 +31,7 @@
 						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#start_id#" title="{{Démarrer}}" onclick="jeedom.cmd.execute({id: #start_id#});"><i class="fa-lg icon fas fa-play"></i></button>
 						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#pause_id#" title="{{Pause}}" onclick="jeedom.cmd.execute({id: #pause_id#});"><i class="fa-lg icon fas fa-pause"></i></button>
 						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#resume_id#" title="{{Reprendre}}" onclick="jeedom.cmd.execute({id: #resume_id#});"><i class="fa-lg icon fas fa-redo-alt"></i></button>
-						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#cancel_id#" title="{{Annuler}}" onclick="jeedom.cmd.execute({id: #cancel_id#});"><i class="fa-lg icon fas fa-times"></i></button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#cancel_id#" title="{{Annuler}}" onclick="bootbox.confirm('<br><br>{{La fin de l\'activité entraine la perte de toutes les données de l\'activité en cours. Mettre fin à l\'activité maintenant ?}}', function(result) { if(result) { jeedom.cmd.execute({id: #cancel_id#}); } });"><i class="fa-lg icon fas fa-times"></i></button>
 						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#dock_id#" title="{{Retour station}}" onclick="jeedom.cmd.execute({id: #dock_id#});"><i class="fa-lg icon fas fa-home"></i></button>
 						<div class="mammotion_select_wrapper">
 							<i class="fa-lg icon fas fa-map-marked-alt"></i>
