@@ -312,6 +312,10 @@ class MammotionDaemon(BaseDaemon):
             rpt = device.report_data
             mode = rpt.dev.sys_status
 
+            if mode == WorkMode.MODE_NOT_ACTIVE and device.online:
+                self._logger.debug(f"Ignoring unreliable MODE_NOT_ACTIVE frame for {name}")
+                return
+
             # Journal d'événements : détection des transitions d'état
             event = None
             last_mode = self._last_mode.get(name)
@@ -332,7 +336,7 @@ class MammotionDaemon(BaseDaemon):
                 'connect_type': device_connection(rpt.connect),
                 'work_progress': rpt.work.mow_percent,
                 'work_area': rpt.work.area_mowed,
-                'current_area': next((a.name for a in device.map.area_name if a.hash == (rpt.locations[0].bol_hash if rpt.locations else 0)), ''),
+                'current_area': next((a.name for a in device.map.area_name if a.hash == rpt.work.ub_zone_hash), ''),
                 'left_time': rpt.work.progress >> 16,
                 'elapsed_time': max(0, (rpt.work.progress & 0xFFFF) - (rpt.work.progress >> 16)),
                 'blade_height': rpt.work.knife_height,
@@ -353,7 +357,7 @@ class MammotionDaemon(BaseDaemon):
                 data['last_event'] = event
             if not data['firmware']:
                 data.pop('firmware')
-
+        
         self._logger.debug(f"Sending state to Jeedom for {name} : {data}")
         await self.send_to_jeedom({'event': 'state', 'device': name, 'data': data})
 
@@ -378,19 +382,19 @@ class MammotionDaemon(BaseDaemon):
             return
 
         # Tâche interrompue (point d'arrêt) -> reprise du job planifié
-        if breakpoint_info != 0 and area_hash is None:
-            self._logger.info(f"Restarting planned task from breakpoint for {name}")
-            await self._client.send_command_and_wait(name, 'query_generate_route_information', 'bidire_reqconver_path')
-            await self._client.send_command_with_args(name, 'start_job')
-            return
+        #if breakpoint_info != 0 and area_hash is None:
+        #    self._logger.info(f"Restarting planned task from breakpoint for {name}")
+        #    await self._client.send_command_and_wait(name, 'query_generate_route_information', 'bidire_reqconver_path')
+        #    await self._client.send_command_with_args(name, 'start_job')
+        #    return
 
         # Aucune reprise en cours et pas de zone imposée -> lancer l'activité par défaut
-        if area_hash is None:
-            default_plan = next((p for p in device.map.plan.values() if p.is_enabled()), None)
-            if default_plan is not None:
-                self._logger.info(f"Starting default activity '{default_plan.task_name}' for {name}")
-                await self._client.send_command_and_wait(name, 'single_schedule', 'todev_planjob_set', plan_id=default_plan.plan_id)
-                return
+        #if area_hash is None:
+        #    default_plan = next((p for p in device.map.plan.values() if p.is_enabled()), None)
+        #    if default_plan is not None:
+        #        self._logger.info(f"Starting default activity '{default_plan.task_name}' for {name}")
+        #        await self._client.send_command_and_wait(name, 'single_schedule', 'todev_planjob_set', plan_id=default_plan.plan_id)
+        #        return
 
         # Nouvelle tâche -> planification de la route puis démarrage
         settings = OperationSettings()
