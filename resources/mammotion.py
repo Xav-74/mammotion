@@ -75,8 +75,6 @@ class MammotionDaemon(BaseDaemon):
         self._client.setup_all_mower_watchers()
         for handle in self._devices():
             self._subscriptions.append(handle.subscribe_state_changed(self._make_state_handler(handle.device_name)))
-            if not DeviceType.is_swimming_pool(handle.device_name):
-                self._subscriptions.append(handle.subscribe_map_updated(self._make_map_handler(handle.device_name)))
             await handle.start()
         self._logger.info(f"Connected to Mammotion cloud - {len(self._devices())} device(s) found")
 
@@ -94,6 +92,8 @@ class MammotionDaemon(BaseDaemon):
                 for handle in self._devices():
                     await self._sync_areas(handle.device_name)
                     await self._send_state(handle.device_name)
+                for handle in self._devices():
+                    await self._sync_plans(handle.device_name)
 
             elif action == 'refresh':
                 if DeviceType.is_swimming_pool(device):
@@ -145,13 +145,6 @@ class MammotionDaemon(BaseDaemon):
     def _make_state_handler(self, name: str):
         async def _handler(snapshot):
             await self._send_state(name)
-        return _handler
-
-
-    def _make_map_handler(self, name: str):
-        async def _handler():
-            await self._send_areas(name)
-            await self._send_plans(name)
         return _handler
 
 
@@ -217,15 +210,76 @@ class MammotionDaemon(BaseDaemon):
             is_pool = DeviceType.is_swimming_pool(handle.device_name)
             mower_state = getattr(device, 'mower_state', None)
             cloud = aliyun.get(handle.device_name)
+            limits = device.device_limits if device else None
             devices.append({
                 'name': handle.device_name,
                 'device_type': 'pool' if is_pool else 'mower',
                 'model': (cloud.product_model if cloud else '') or (mower_state.model_id if mower_state else '') or (mower_state.model if mower_state else ''),
                 'swversion': mower_state.swversion if mower_state else '',
                 'has_blade_control': int(not is_pool and not DeviceType.is_yuka(handle.device_name)),
+                'blade_height_min': limits.blade_height.min if limits else 0,
+                'blade_height_max': limits.blade_height.max if limits else 0,
+                'speed_min': limits.working_speed.min if limits else 0,
+                'speed_max': limits.working_speed.max if limits else 0,
             })
         self._logger.info(f"Sending device list to Jeedom : {[d['name'] for d in devices]}")
         await self.send_to_jeedom({'event': 'devices', 'data': devices})
+
+
+    async def _sync_areas(self, name: str):
+        if DeviceType.is_swimming_pool(name):
+            return
+        device = self._client.get_device_by_name(name)
+        if device is None:
+            return
+        # On repère la fin de la MapFetchSaga par l'apparition des noms de zones.
+        before = len(device.map.area_name)
+        try:
+            await self._client.start_map_sync(name)
+        except Exception as e:
+            self._logger.warning(f"Map sync failed for {name}: {e}")
+            return
+        # Attente courte que la saga peuple area_name (timeout ~15s)
+        for _ in range(30):
+            await asyncio.sleep(0.5)
+            if device.map.area_name and len(device.map.area_name) >= before:
+                break
+        await self._send_areas(name)
+
+
+    async def _send_areas(self, name: str):
+        device = self._client.get_device_by_name(name)
+        areas = [{'name': a.name or str(a.hash), 'hash': a.hash} for a in device.map.area_name]
+        self._logger.info(f"Sending areas to Jeedom for {name} : {[a['name'] for a in areas]}")
+        await self.send_to_jeedom({'event': 'areas', 'device': name, 'data': areas})
+
+
+    async def _sync_plans(self, name: str):
+        if DeviceType.is_swimming_pool(name):
+            return
+        device = self._client.get_device_by_name(name)
+        if device is None:
+            return
+        device.map.plans_stale = True
+        try:
+            await self._client.start_plan_sync(name)
+        except Exception as e:
+            self._logger.warning(f"Plan sync failed for {name} : {e}")
+            return
+        # Attente de la fin de la saga (timeout ~15s)
+        for _ in range(30):
+            await asyncio.sleep(0.5)
+            if not device.map.plans_stale:
+                break
+        await self._send_plans(name)
+
+
+    async def _send_plans(self, name: str):
+        # Activités (plans) créées par l'utilisateur dans l'application
+        device = self._client.get_device_by_name(name)
+        plans = [{'plan_id': p.plan_id, 'name': p.task_name or p.plan_id} for p in device.map.plan.values()]
+        self._logger.info(f"Sending plans to Jeedom for {name} : {[p['name'] for p in plans]}")
+        await self.send_to_jeedom({'event': 'plans', 'device': name, 'data': plans})
 
 
     async def _sync_device_info(self, name: str):
@@ -261,31 +315,7 @@ class MammotionDaemon(BaseDaemon):
 
         # Force une remontée d'état
         await self._client.ensure_fresh_state(name, max_age_s=0)
-
-
-    async def _sync_areas(self, name: str):
-        if DeviceType.is_swimming_pool(name):
-            return
-        try:
-            await self._client.start_map_sync(name)
-        except Exception as e:
-            self._logger.warning(f"Map sync failed for {name}: {e}")
-
-
-    async def _send_areas(self, name: str):
-        device = self._client.get_device_by_name(name)
-        areas = [{'name': a.name or str(a.hash), 'hash': a.hash} for a in device.map.area_name]
-        self._logger.info(f"Sending areas to Jeedom for {name} : {[a['name'] for a in areas]}")
-        await self.send_to_jeedom({'event': 'areas', 'device': name, 'data': areas})
-
-
-    async def _send_plans(self, name: str):
-        # Activités (plans) créées par l'utilisateur dans l'application
-        device = self._client.get_device_by_name(name)
-        plans = [{'plan_id': p.plan_id, 'name': p.task_name or p.plan_id} for p in device.map.plan.values()]
-        self._logger.info(f"Sending plans to Jeedom for {name} : {[p['name'] for p in plans]}")
-        await self.send_to_jeedom({'event': 'plans', 'device': name, 'data': plans})
-
+        
 
     async def _send_state(self, name: str):
         now = time.monotonic()
@@ -313,7 +343,7 @@ class MammotionDaemon(BaseDaemon):
             mode = rpt.dev.sys_status
 
             if mode == WorkMode.MODE_NOT_ACTIVE and device.online:
-                self._logger.debug(f"Ignoring unreliable MODE_NOT_ACTIVE frame for {name}")
+                self._logger.debug(f"Ignoring MODE_NOT_ACTIVE frame for {name}")
                 return
 
             # Journal d'événements : détection des transitions d'état
