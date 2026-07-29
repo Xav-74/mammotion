@@ -18,24 +18,46 @@ from pymammotion.utility.device_type import DeviceType
 
 
 STATE_THROTTLE = 2  # secondes minimum entre deux envois d'état vers Jeedom
+LANG = 'en'         # langue des libellés (événements et erreurs) : 'en', 'fr', 'de', 'es', 'it', 'pt'...
 
-EVENT_LABELS = {
-    WorkMode.MODE_WORKING: 'Tonte démarrée',
-    WorkMode.MODE_MANUAL_MOWING: 'Tonte manuelle démarrée',
-    WorkMode.MODE_PAUSE: 'Tonte en pause',
-    WorkMode.MODE_CHARGING_PAUSE: 'Tonte en pause (charge)',
-    WorkMode.MODE_RETURNING: 'Retour à la station',
-    WorkMode.MODE_CHARGING: 'Charge à la station',
-    WorkMode.MODE_READY: 'Prêt',
-    WorkMode.MODE_OFFLINE: 'Hors ligne',
-    WorkMode.MODE_POWER_OFF: 'Éteint',
-    WorkMode.MODE_UPDATING: 'Mise à jour du firmware en cours',
-    WorkMode.MODE_UPDATE_SUCCESS: 'Mise à jour du firmware terminée',
-    WorkMode.MODE_OTA_UPGRADE_FAIL: 'Échec de la mise à jour du firmware',
-    WorkMode.MODE_LOCK: 'Verrouillé',
-    WorkMode.MODE_LOCATION_ERROR: 'Erreur de localisation',
+EVENT_LABELS_ALL = {
+    'fr': {
+        WorkMode.MODE_WORKING: 'Tonte démarrée',
+        WorkMode.MODE_MANUAL_MOWING: 'Tonte manuelle démarrée',
+        WorkMode.MODE_PAUSE: 'Tonte en pause',
+        WorkMode.MODE_CHARGING_PAUSE: 'Tonte en pause (charge)',
+        WorkMode.MODE_RETURNING: 'Retour à la station',
+        WorkMode.MODE_CHARGING: 'Charge à la station',
+        WorkMode.MODE_READY: 'Prêt',
+        WorkMode.MODE_OFFLINE: 'Hors ligne',
+        WorkMode.MODE_POWER_OFF: 'Éteint',
+        WorkMode.MODE_UPDATING: 'Mise à jour du firmware en cours',
+        WorkMode.MODE_UPDATE_SUCCESS: 'Mise à jour du firmware terminée',
+        WorkMode.MODE_OTA_UPGRADE_FAIL: 'Échec de la mise à jour du firmware',
+        WorkMode.MODE_LOCK: 'Verrouillé',
+        WorkMode.MODE_LOCATION_ERROR: 'Erreur de localisation',
+    },
+    'en': {
+        WorkMode.MODE_WORKING: 'Mowing started',
+        WorkMode.MODE_MANUAL_MOWING: 'Manual mowing started',
+        WorkMode.MODE_PAUSE: 'Mowing paused',
+        WorkMode.MODE_CHARGING_PAUSE: 'Mowing paused (charging)',
+        WorkMode.MODE_RETURNING: 'Returning to dock',
+        WorkMode.MODE_CHARGING: 'Charging at dock',
+        WorkMode.MODE_READY: 'Ready',
+        WorkMode.MODE_OFFLINE: 'Offline',
+        WorkMode.MODE_POWER_OFF: 'Powered off',
+        WorkMode.MODE_UPDATING: 'Firmware update in progress',
+        WorkMode.MODE_UPDATE_SUCCESS: 'Firmware update completed',
+        WorkMode.MODE_OTA_UPGRADE_FAIL: 'Firmware update failed',
+        WorkMode.MODE_LOCK: 'Locked',
+        WorkMode.MODE_LOCATION_ERROR: 'Location error',
+    },
 }
 
+# Dictionnaire actif selon LANG, avec repli sur l'anglais si la langue n'est pas définie
+# EVENT_LABELS = EVENT_LABELS_ALL.get(LANG, EVENT_LABELS_ALL['en'])
+EVENT_LABELS = EVENT_LABELS_ALL.get('fr')
 
 class DaemonConfig(BaseConfig):
 
@@ -60,6 +82,7 @@ class MammotionDaemon(BaseDaemon):
         self._last_sent = {}
         self._pending = {}
         self._last_mode = {}
+        self._error_codes = {}
 
 
     async def on_start(self):
@@ -77,6 +100,13 @@ class MammotionDaemon(BaseDaemon):
             self._subscriptions.append(handle.subscribe_state_changed(self._make_state_handler(handle.device_name)))
             await handle.start()
         self._logger.info(f"Connected to Mammotion cloud - {len(self._devices())} device(s) found")
+
+        # Catalogue des codes d'erreur (un seul appel HTTP, mis en cache pour la session).
+        try:
+            self._error_codes = await self._client.mammotion_http.get_all_error_codes()
+            self._logger.info(f"Loaded {len(self._error_codes)} error code descriptions")
+        except Exception as e:
+            self._logger.warning(f"Could not load error code descriptions : {e}")
 
 
     async def on_message(self, message: dict):
@@ -146,6 +176,18 @@ class MammotionDaemon(BaseDaemon):
         async def _handler(snapshot):
             await self._send_state(name)
         return _handler
+
+    
+    def _describe_errors(self, codes):
+        parts = []
+        for code in codes:
+            info = self._error_codes.get(str(code))
+            if info is not None:
+                label = getattr(info, f'{LANG}_implication', '') or info.description
+                parts.append(f"{code} ({label})" if label else str(code))
+            else:
+                parts.append(str(code))
+        return ', '.join(parts)    
 
 
     async def _command(self, name: str, key: str, kwargs: dict):
@@ -384,7 +426,7 @@ class MammotionDaemon(BaseDaemon):
                 'total_work_time': round((rpt.maintenance.work_time or rpt.dev.work_time_sec) / 3600, 1),
                 'bat_cycles': rpt.maintenance.bat_cycles if rpt.maintenance.bat_cycles != 65535 else 0,
                 'firmware': device.mower_state.swversion,
-                'error': ','.join(str(code) for code in device.errors.err_code_list),
+                'error': self._describe_errors(device.errors.err_code_list),
             }
             if event:
                 data['last_event'] = event
