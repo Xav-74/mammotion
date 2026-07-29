@@ -382,7 +382,15 @@ class mammotion extends eqLogic {
 			$order++;
 			$this->createCmd('wifi_rssi', 'Signal Wifi', $order, 'info', 'numeric');
 			$order++;
+			$this->createCmd('ble_rssi', 'Signal Bluetooth', $order, 'info', 'numeric');
+			$order++;
+			$this->createCmd('mnet_rssi', 'Signal cellulaire', $order, 'info', 'numeric');
+			$order++;
 			$this->createCmd('blade_used_time', 'Temps d\'utilisation des lames', $order, 'info', 'numeric');
+			$order++;
+			$this->createCmd('blade_used_warn_time', 'Seuil d\'usure des lames', $order, 'info', 'numeric');
+			$order++;
+			$this->createCmd('blade_used_left_time', 'Temps restant d\'utilisation des lames', $order, 'info', 'numeric');
 			$order++;
 			$this->createCmd('total_mileage', 'Distance totale', $order, 'info', 'numeric');
 			$order++;
@@ -431,7 +439,7 @@ class mammotion extends eqLogic {
 				
 				$this->createCmd('set_blade_height', 'Régler hauteur de lame', $order, 'action', 'slider', 1, 0, [], array('minValue' => $bhMin, 'maxValue' => $bhMax), $this->getCmd(null, 'blade_height_target')->getId());
 				$order++;
-				$this->createCmd('set_speed', 'Régler vitesse (cm/s)', $order, 'action', 'slider', 1, 0, [], array('minValue' => $spMin, 'maxValue' => $spMax), $this->getCmd(null, 'speed_target')->getId());
+				$this->createCmd('set_speed', 'Régler vitesse', $order, 'action', 'slider', 1, 0, [], array('minValue' => $spMin, 'maxValue' => $spMax), $this->getCmd(null, 'speed_target')->getId());
 				$order++;
 			}
 		}
@@ -570,8 +578,14 @@ class mammotion extends eqLogic {
 			$this->checkAndUpdateCmd($key, $value);
 		}
 		log::add('mammotion', 'debug', 'State updated for '.$this->getName().' : '.json_encode($data));
+		
+		$usedCmd = $this->getCmd(null, 'blade_used_time');
+		$warnCmd = $this->getCmd(null, 'blade_used_warn_time');
+		$used_time = (float) $usedCmd->execCmd();
+		$warn_time = (float) $warnCmd->execCmd();
+		$this->checkAndUpdateCmd('blade_used_left_time', max(0, $warn_time - $used_time));
 	}
-
+	
 	/* Mise à jour de la liste des zones */
 	public function handleAreas($areas)
 	{
@@ -691,7 +705,7 @@ class mammotionCmd extends cmd {
 
 			case 'set_speed':
 				$eqLogic->checkAndUpdateCmd('speed_target', $_options['slider']);
-				mammotion::sendToDaemon('command', $device, array('key' => 'set_speed', 'kwargs' => array('speed' => $_options['slider'] / 100)));
+				mammotion::sendToDaemon('command', $device, array('key' => 'set_speed', 'kwargs' => array('speed' => (float) $_options['slider'])));
 				break;
 
 			case 'set_clean_mode':

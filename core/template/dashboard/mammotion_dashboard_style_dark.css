@@ -23,7 +23,8 @@
 	display : flex;
 	justify-content : center;
 	height: 200px;
-	margin-top: -32px
+	margin-top: -32px;
+	margin-left: 123px;
 }
 
 .mammotion_widget_flat #icon_tile {

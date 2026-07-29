@@ -315,7 +315,7 @@ class MammotionDaemon(BaseDaemon):
 
         # Force une remontée d'état
         await self._client.ensure_fresh_state(name, max_age_s=0)
-        
+
 
     async def _send_state(self, name: str):
         now = time.monotonic()
@@ -376,7 +376,10 @@ class MammotionDaemon(BaseDaemon):
                 'gps_coordinates': f"{device.location.device.latitude},{device.location.device.longitude}" if device.location.RTK.latitude != 0.0 else '',
                 'orientation': device.location.orientation,
                 'wifi_rssi': rpt.connect.wifi_rssi,
+                'ble_rssi': rpt.connect.ble_rssi,
+                'mnet_rssi': rpt.connect.mnet_rssi,
                 'blade_used_time': round(rpt.maintenance.blade_used_time.blade_used_time / 3600, 1),
+                'blade_used_warn_time': round(rpt.maintenance.blade_used_time.blade_used_warn_time / 3600, 1),
                 'total_mileage': round((rpt.maintenance.mileage or rpt.dev.mileage) / 1000, 1),
                 'total_work_time': round((rpt.maintenance.work_time or rpt.dev.work_time_sec) / 3600, 1),
                 'bat_cycles': rpt.maintenance.bat_cycles if rpt.maintenance.bat_cycles != 65535 else 0,
