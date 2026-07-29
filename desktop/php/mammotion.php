@@ -50,7 +50,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 		</div>
 
-		<legend><i class="fas fa-table"></i> {{Mes robots}}</legend>
+		<legend><i class="fas fa-robot"></i> {{Mes robots}}</legend>
 		<div class="input-group" style="margin-bottom:5px;">
 			<input class="form-control roundedLeft" placeholder="{{Rechercher}}" id="in_searchEqlogic"/>
 			<div class="input-group-btn" style="margin-bottom:5px;">

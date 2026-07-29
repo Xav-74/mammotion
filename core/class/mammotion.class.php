@@ -278,11 +278,21 @@ class mammotion extends eqLogic {
 					'message' => __('Nouveau robot détecté : ', __FILE__).$device['name'],
 				));
 			}
+			
 			$eqLogic->setConfiguration('device_name', $device['name']);
 			$eqLogic->setConfiguration('device_type', $device['device_type']);
 			if ($device['model'] != '') { $eqLogic->setConfiguration('device_model', $device['model']); }
 			if ($device['swversion'] != '') { $eqLogic->setConfiguration('device_swversion', $device['swversion']); }
 			$eqLogic->setConfiguration('has_blade_control', $device['has_blade_control']);
+			
+			if (isset($device['blade_height_max']) && $device['blade_height_max'] > 0) {
+				$eqLogic->setConfiguration('blade_height_min', $device['blade_height_min']);
+				$eqLogic->setConfiguration('blade_height_max', $device['blade_height_max']);
+			}
+			if (isset($device['speed_max']) && $device['speed_max'] > 0) {
+				$eqLogic->setConfiguration('speed_min', $device['speed_min']);
+				$eqLogic->setConfiguration('speed_max', $device['speed_max']);
+			}
 			
 			$eqLogic->save();
 		}
@@ -408,11 +418,20 @@ class mammotion extends eqLogic {
 			$this->createCmd('start_activity', 'Lancer une activité', $order, 'action', 'select');
 			$order++;
 			
-			// Réglages hauteur de lame / vitesse : non supportés par la gamme Yuka
+			// Réglages hauteur de lame / vitesse (non supportés par la gamme Yuka, uniquement Luba)
 			if ($this->getConfiguration('has_blade_control', 1) == 1) {
-				$this->createCmd('set_blade_height', 'Régler hauteur de lame', $order, 'action', 'slider', 1, 0, [], array('minValue' => 25, 'maxValue' => 70));
+				$bhMin = $this->getConfiguration('blade_height_min', 30);
+				$bhMax = $this->getConfiguration('blade_height_max', 70);
+				$spMin = $this->getConfiguration('speed_min', 0.2);
+				$spMax = $this->getConfiguration('speed_max', 0.4);
+				$this->createCmd('blade_height_target', 'Consigne hauteur de lame', $order, 'info', 'numeric', 1, 1);
 				$order++;
-				$this->createCmd('set_speed', 'Régler vitesse (cm/s)', $order, 'action', 'slider', 1, 0, [], array('minValue' => 20, 'maxValue' => 60));
+				$this->createCmd('speed_target', 'Consigne vitesse', $order, 'info', 'numeric', 1, 1);
+				$order++;
+				
+				$this->createCmd('set_blade_height', 'Régler hauteur de lame', $order, 'action', 'slider', 1, 0, [], array('minValue' => $bhMin, 'maxValue' => $bhMax), $this->getCmd(null, 'blade_height_target')->getId());
+				$order++;
+				$this->createCmd('set_speed', 'Régler vitesse (cm/s)', $order, 'action', 'slider', 1, 0, [], array('minValue' => $spMin, 'maxValue' => $spMax), $this->getCmd(null, 'speed_target')->getId());
 				$order++;
 			}
 		}
@@ -461,6 +480,10 @@ class mammotion extends eqLogic {
 
 		//Traitement des des options de configuration
 		$replace['#device_name'.$this->getId().'#'] = $this->getConfiguration('device_name');
+		$replace['#blade_height_min'.$this->getId().'#'] = $this->getConfiguration('blade_height_min',30);
+		$replace['#blade_height_max'.$this->getId().'#'] = $this->getConfiguration('blade_height_max',70);
+		$replace['#speed_min'.$this->getId().'#'] = $this->getConfiguration('speed_min',0.2);
+		$replace['#speed_max'.$this->getId().'#'] = $this->getConfiguration('speed_max',0.4);
 				
 		// Traitement des commandes infos
 		foreach ($this->getCmd('info') as $cmd) {
@@ -506,7 +529,7 @@ class mammotion extends eqLogic {
     public static function preConfig_<Variable>() {
     } */
 
-	private function createCmd($commandName, $commandDescription, $order, $type, $subType, $isVisible = 1, $isHistorized = 0, $template = [], $configuration = [])
+	private function createCmd($commandName, $commandDescription, $order, $type, $subType, $isVisible = 1, $isHistorized = 0, $template = [], $configuration = [], $idCmd = null)
 	{
 		$cmd = $this->getCmd(null, $commandName);
         if (!is_object($cmd)) {
@@ -521,6 +544,7 @@ class mammotion extends eqLogic {
 			$cmd->setIsHistorized($isHistorized);
 			if (!empty($template)) { $cmd->setTemplate($template[0], $template[1]); }
 			foreach ($configuration as $key => $value) { $cmd->setConfiguration($key, $value); }
+			$cmd->setValue($idCmd);
 			$cmd->save();
 			log::add('mammotion', 'debug', 'Add command '.$cmd->getName().' (LogicalId : '.$cmd->getLogicalId().')');
         }
@@ -661,10 +685,12 @@ class mammotionCmd extends cmd {
 				break;
 
 			case 'set_blade_height':
+				$eqLogic->checkAndUpdateCmd('blade_height_target', $_options['slider']);
 				mammotion::sendToDaemon('command', $device, array('key' => 'set_blade_height', 'kwargs' => array('height' => (int) $_options['slider'])));
 				break;
 
 			case 'set_speed':
+				$eqLogic->checkAndUpdateCmd('speed_target', $_options['slider']);
 				mammotion::sendToDaemon('command', $device, array('key' => 'set_speed', 'kwargs' => array('speed' => $_options['slider'] / 100)));
 				break;
 
