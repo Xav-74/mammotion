@@ -295,6 +295,24 @@ class mammotion extends eqLogic {
 			}
 			
 			$eqLogic->save();
+			$eqLogic->updateSliderBounds();
+		}
+	}
+
+	/* Met à jour les bornes min/max des sliders hauteur/vitesse depuis la configuration */
+	public function updateSliderBounds()
+	{
+		$map = array(
+			'set_blade_height' => array('blade_height_min', 30, 'blade_height_max', 70),
+			'set_speed'        => array('speed_min', 0.2, 'speed_max', 0.6),
+		);
+		foreach ($map as $cmdName => $conf) {
+			$cmd = $this->getCmd(null, $cmdName);
+			if (!is_object($cmd)) { continue; }
+			$cmd->setConfiguration('minValue', $this->getConfiguration($conf[0], $conf[1]));
+			$cmd->setConfiguration('maxValue', $this->getConfiguration($conf[2], $conf[3]));
+			$cmd->save();
+			log::add('mammotion', 'debug', 'Update command '.$cmd->getName().' (LogicalId : '.$cmd->getLogicalId().') - min : '.$this->getConfiguration($conf[0], $conf[1]).' / max : '.$this->getConfiguration($conf[2], $conf[3]));
 		}
 	}
 
@@ -431,7 +449,7 @@ class mammotion extends eqLogic {
 				$bhMin = $this->getConfiguration('blade_height_min', 30);
 				$bhMax = $this->getConfiguration('blade_height_max', 70);
 				$spMin = $this->getConfiguration('speed_min', 0.2);
-				$spMax = $this->getConfiguration('speed_max', 0.4);
+				$spMax = $this->getConfiguration('speed_max', 0.6);
 				$this->createCmd('blade_height_target', 'Consigne hauteur de lame', $order, 'info', 'numeric', 1, 1);
 				$order++;
 				$this->createCmd('speed_target', 'Consigne vitesse', $order, 'info', 'numeric', 1, 1);
@@ -622,6 +640,22 @@ class mammotion extends eqLogic {
 		log::add('mammotion', 'debug', 'Plans updated for '.$this->getName().' : '.json_encode($plans));
 	}
 
+	/* Consignes hauteur/vitesse à appliquer au lancement d'une tonte (start / start_zone) */
+	public function getStartSettings()
+	{
+		$settings = array();
+		$heightCmd = $this->getCmd(null, 'blade_height_target');
+		$speedCmd = $this->getCmd(null, 'speed_target');
+		if (is_object($heightCmd)) {
+			$settings['height'] = (int) $heightCmd->execCmd();
+		}
+		if (is_object($speedCmd)) {
+			$settings['speed'] = (float) $speedCmd->execCmd();
+		}
+		return $settings;
+	}
+
+	/* Envoi des notifications */
 	public function sendNotification($event) {
 
         // Information
@@ -687,11 +721,11 @@ class mammotionCmd extends cmd {
 				break;
 
 			case 'start':
-				mammotion::sendToDaemon('start', $device);
+				mammotion::sendToDaemon('start', $device, $eqLogic->getStartSettings());
 				break;
 
 			case 'start_zone':
-				mammotion::sendToDaemon('start', $device, array('hash' => $_options['select']));
+				mammotion::sendToDaemon('start', $device, array_merge(array('hash' => $_options['select']), $eqLogic->getStartSettings()));
 				break;
 
 			case 'start_activity':

@@ -10,6 +10,7 @@ from jeedomdaemon import BaseDaemon, BaseConfig
 from pymammotion.aliyun.exceptions import CheckSessionException, DeviceOfflineException, GatewayTimeoutException
 from pymammotion.client import MammotionClient
 from pymammotion.data.model import GenerateRouteInformation
+from pymammotion.data.model.device import _device_config
 from pymammotion.data.model.device_config import OperationSettings, create_path_order
 from pymammotion.data.model.pool_state import SpinoWorkMode
 from pymammotion.transport.base import CommandTimeoutError
@@ -136,7 +137,7 @@ class MammotionDaemon(BaseDaemon):
                 if DeviceType.is_swimming_pool(device):
                     await self._command(device, 'clean_mode', {'work_mode': SpinoWorkMode.AUTO.value})
                 else:
-                    await self._start(device, args.get('hash'))
+                    await self._start(device, args.get('hash'), args)
 
             elif action == 'start_plan':
                 await self._client.send_command_and_wait(device, 'single_schedule', 'todev_planjob_set', plan_id=args['plan_id'])
@@ -231,10 +232,14 @@ class MammotionDaemon(BaseDaemon):
             await self._client.send_command_and_wait(name, 'leave_dock', 'todev_taskctrl_ack')
 
         elif key == 'set_blade_height':
-            await self._client.send_command_and_wait(name, 'set_blade_height', 'toapp_knife_status_change', **kwargs)
+            device = self._client.get_device_by_name(name)
+            if device.report_data.dev.sys_status == WorkMode.MODE_WORKING:
+                await self._client.send_command_and_wait(name, 'set_blade_height', 'toapp_knife_status_change', **kwargs)
 
         elif key == 'set_speed':
-            await self._client.send_command_and_wait(name, 'set_speed', 'bidire_speed_read_set', **kwargs)
+            device = self._client.get_device_by_name(name)
+            if device.report_data.dev.sys_status == WorkMode.MODE_WORKING:
+                await self._client.send_command_and_wait(name, 'set_speed', 'bidire_speed_read_set', **kwargs)
 
         else:
             await self._client.send_command_with_args(name, key, **kwargs)
@@ -253,6 +258,10 @@ class MammotionDaemon(BaseDaemon):
             mower_state = getattr(device, 'mower_state', None)
             cloud = aliyun.get(handle.device_name)
             limits = device.device_limits if device else None
+            if (limits is None or limits.blade_height.max == 0) and cloud is not None:
+                fallback = _device_config.get_working_parameters(cloud.product_key) or _device_config.get_best_default(cloud.product_key)
+                if fallback is not None:
+                    limits = fallback
             devices.append({
                 'name': handle.device_name,
                 'device_type': 'pool' if is_pool else 'mower',
@@ -443,7 +452,8 @@ class MammotionDaemon(BaseDaemon):
         await self._send_state(name)
 
 
-    async def _start(self, name: str, area_hash=None):
+    async def _start(self, name: str, area_hash=None, kwargs=None):
+        kwargs = kwargs or {}
         await self._client.ensure_fresh_state(name)
         device = self._client.get_device_by_name(name)
         mode = device.report_data.dev.sys_status
@@ -476,9 +486,13 @@ class MammotionDaemon(BaseDaemon):
         settings.areas = [int(area_hash)] if area_hash is not None else [a.hash for a in device.map.area_name]
         if not settings.areas:
             self._logger.warning(f"No area known for {name} - launch a synchronization first")
-        if device.work.speed:
+        if kwargs.get('speed'):
+            settings.speed = kwargs['speed']
+        elif device.work.speed:
             settings.speed = device.work.speed
-        if device.work.knife_height:
+        if kwargs.get('height'):
+            settings.blade_height = kwargs['height']
+        elif device.work.knife_height:
             settings.blade_height = device.work.knife_height
         if device.report_data.dev.collector_status.collector_installation_status == 0:
             settings.is_dump = False
