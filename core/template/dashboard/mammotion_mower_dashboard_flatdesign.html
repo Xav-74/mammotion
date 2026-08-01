@@ -13,11 +13,25 @@
 		<div>
 			
 			<!-- Column N°1 -->
-			<div class="col-xs-4 column_1#id#" id="column" style="width:452px;">
+			<div class="col-xs-6 column_1#id#" id="column" style="width:452px;">
 				
-				<div class="col-xs-6" id="tile" style="height:150px; width: 446px;">
-					<div id="picture" style="width:200px;"> 
+				<div class="col-xs-6" id="tile" style="height:150px; width: 220px;">
+					<div id="picture"> 
 						<img id="img#id#"/>
+					</div>
+				</div>
+				<div class="col-xs-6" id="tile" style="height:150px; width: 220px;">
+					<div class="col-xs-2" id="icon_tile" style="height:50px;"><i class="fas fa-tools"></i></div>
+					<div class="col-xs-10" id="titre_tile" style="height:50px; align-content:center;">{{Entretien}}</div>
+					<div class="col-xs-12" id="sub_tile" style="height:75px;">
+						<div class="col-xs-8" id="titre_tile_3"><span>{{Kilométrage total :}}</span></div>
+						<div class="col-xs-4" id="value_tile"><span class="Cmd#total_mileage_id#"></span></div>
+						<div class="col-xs-8" id="titre_tile_3"><span>{{Durée d'activité :}}</span></div>
+						<div class="col-xs-4" id="value_tile"><span class="Cmd#total_work_time_id#"></span></div>
+						<div class="col-xs-8" id="titre_tile_3"><span>{{Cycle de batterie :}}</span></div>
+						<div class="col-xs-4" id="value_tile"><span class="Cmd#bat_cycles_id#"></span></div>
+						<div class="col-xs-8" id="titre_tile_3"><span>{{Temps restant lames :}}</span></div>
+						<div class="col-xs-4" id="value_tile"><span class="Cmd#blade_used_left_time_id#"></span></div>
 					</div>
 				</div>
 
@@ -72,7 +86,7 @@
 			</div>
 
 			<!-- Column N°2 -->
-			<div class="col-xs-4 column_1#id#" id="column" style="width:452px;">
+			<div class="col-xs-6 column_1#id#" id="column" style="width:452px;">
 				
 				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
 					<div class="col-xs-3" id="icon_tile" style="height:67px;"><span class="Ico#charging_id#"></span></div>
@@ -233,6 +247,30 @@
 		//----- Dashboard display update
 		function updateDisplayDashboard#id#()  {
 	
+			//----- Maintenance
+			jeedom.cmd.update['#total_mileage_id#'] =function(_options) {
+				$('.Cmd#total_mileage_id#').empty().append('<span>'+ Math.round(_options.display_value) +' km</span>');
+			}
+			jeedom.cmd.update['#total_mileage_id#']({display_value: '#total_mileage#'});
+			
+			jeedom.cmd.update['#total_work_time_id#'] =function(_options) {
+				$('.Cmd#total_work_time_id#').empty().append('<span>'+ Math.round(_options.display_value) +' heures</span>');
+			}
+			jeedom.cmd.update['#total_work_time_id#']({display_value: '#total_work_time#'});
+
+			jeedom.cmd.update['#bat_cycles_id#'] =function(_options) {
+				$('.Cmd#bat_cycles_id#').empty().append('<span>'+ _options.display_value +' fois</span>');
+			}
+			jeedom.cmd.update['#bat_cycles_id#']({display_value: '#bat_cycles#'});
+
+			jeedom.cmd.update['#blade_used_left_time_id#'] =function(_options) {
+				var left_time = Math.round(_options.display_value);
+				if (left_time >= 0 && left_time <= 5) { $('.Cmd#blade_used_left_time_id#').empty().append('<span style="color : rgb(185, 58, 62);">'+ left_time +' heures</span>'); }
+				else if (left_time > 5 && left_time <= 10) { $('.Cmd#blade_used_left_time_id#').empty().append('<span style="color : rgb(195, 125, 40);">'+ left_time +' heures</span>'); }
+				else { $('.Cmd#blade_used_left_time_id#').empty().append('<span>'+ left_time +' heures</span>'); }
+			}
+			jeedom.cmd.update['#blade_used_left_time_id#']({display_value: '#blade_used_left_time#'});			
+			
 			//----- Base
 			jeedom.cmd.update['#docked_id#'] =function(_options) {
 				if ( _options.display_value == 1 )  {

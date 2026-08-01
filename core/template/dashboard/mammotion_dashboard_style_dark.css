@@ -19,12 +19,20 @@
 	border-color : rgb(30,30,30);
 }
 
+.mammotion_widget_flat #sub_tile {
+    display: flex;
+    align-items: center;
+	align-content: center;
+    flex-wrap: wrap;
+	margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 0px !important;
+}
+
 .mammotion_widget_flat #picture {
 	display : flex;
 	justify-content : center;
-	height: 200px;
-	margin-top: -32px;
-	margin-left: 123px;
+	height: 180px;
+	margin-top: -20px;
 }
 
 .mammotion_widget_flat #icon_tile {
@@ -113,6 +121,14 @@
 	margin : 0px 0px 0px 0px !important;
 	padding : 5px 10px 0px 0px !important;
 	align-content: center;
+}
+
+.mammotion_widget_flat #titre_tile_3 {
+	font-size : 12px;
+	color : var(--txt-color) !important;
+	text-align : left;
+	margin : 0px 0px 0px 0px !important;
+	padding : 0px 0px 0px 10px !important;
 }
 
 .mammotion_widget_flat .mammotion_progress-container{
