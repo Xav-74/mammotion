@@ -233,13 +233,13 @@ class MammotionDaemon(BaseDaemon):
 
         elif key == 'set_blade_height':
             device = self._client.get_device_by_name(name)
-            if device.report_data.dev.sys_status == WorkMode.MODE_WORKING:
-                await self._client.send_command_and_wait(name, 'set_blade_height', 'toapp_knife_status_change', **kwargs)
+            if device.report_data.dev.sys_status in (WorkMode.MODE_WORKING, WorkMode.MODE_MANUAL_MOWING):
+                await self._modify_running(name, kwargs)
 
         elif key == 'set_speed':
             device = self._client.get_device_by_name(name)
-            if device.report_data.dev.sys_status == WorkMode.MODE_WORKING:
-                await self._client.send_command_and_wait(name, 'set_speed', 'bidire_speed_read_set', **kwargs)
+            if device.report_data.dev.sys_status in (WorkMode.MODE_WORKING, WorkMode.MODE_MANUAL_MOWING):
+                await self._modify_running(name, kwargs)
 
         else:
             await self._client.send_command_with_args(name, key, **kwargs)
@@ -499,6 +499,14 @@ class MammotionDaemon(BaseDaemon):
         if DeviceType.is_yuka(name):
             settings.blade_height = -10
 
+        route = self._build_route(name, settings)
+
+        self._logger.info(f"Planning route for {name} (areas : {settings.areas}) and starting job")
+        await self._client.send_command_and_wait(name, 'generate_route_information', 'bidire_reqconver_path', generate_route_information=route)
+        await self._client.send_command_and_wait(name, 'start_job', 'todev_taskctrl_ack')
+
+
+    def _build_route(self, name: str, settings):
         route = GenerateRouteInformation(
             one_hashs=settings.areas,
             rain_tactics=settings.rain_tactics,
@@ -518,10 +526,41 @@ class MammotionDaemon(BaseDaemon):
         if DeviceType.is_luba1(name):
             route.toward_mode = 0
             route.toward_included_angle = 0
+        return route
 
-        self._logger.info(f"Planning route for {name} (areas : {settings.areas}) and starting job")
-        await self._client.send_command_and_wait(name, 'generate_route_information', 'bidire_reqconver_path', generate_route_information=route)
-        await self._client.send_command_and_wait(name, 'start_job', 'todev_taskctrl_ack')
+    
+    async def _modify_running(self, name: str, kwargs: dict):
+        # Ajustement hauteur/vitesse pendant une tonte
+        device = self._client.get_device_by_name(name)
+        work = device.report_data.work
+        # Garde (identique à HA) : uniquement si une zone connue (pas activité programmée).
+        if work.bp_hash not in device.work.zone_hashs or work.mow_percent == 100:
+            self._logger.info(f"{name} not mowing an adjustable zone - live adjustment skipped")
+            return
+        settings = OperationSettings()
+        settings.areas = list(dict.fromkeys(device.work.zone_hashs))
+        settings.toward = device.work.toward
+        settings.toward_mode = device.work.toward_mode
+        settings.toward_included_angle = device.work.toward_included_angle
+        settings.mowing_laps = device.work.edge_mode
+        settings.job_mode = device.work.job_mode
+        settings.job_id = device.work.job_id
+        settings.job_version = device.work.job_ver
+        # On repart des valeurs de la tâche en cours, puis on n'écrase que le paramètre ajusté
+        if device.work.speed:
+            settings.speed = device.work.speed
+        if device.work.knife_height:
+            settings.blade_height = device.work.knife_height
+        if kwargs.get('speed'):
+            settings.speed = kwargs['speed']
+        if kwargs.get('height'):
+            settings.blade_height = kwargs['height']
+        if DeviceType.is_yuka(name):
+            settings.blade_height = -10
+
+        route = self._build_route(name, settings)
+        self._logger.info(f"Modifying running route for {name} (speed={settings.speed}, height={settings.blade_height})")
+        await self._client.send_command_with_args(name, 'modify_route_information', generate_route_information=route)
 
 
 MammotionDaemon().run()
