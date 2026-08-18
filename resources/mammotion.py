@@ -385,17 +385,20 @@ class MammotionDaemon(BaseDaemon):
             data = {
                 'online': int(device.online),
                 'battery': pool.battery,
+                'charging': int(pool.charging),
                 'work_mode': pool.sys_status.name,
                 'clean_mode': pool.work_mode.name,
                 'speed': pool.floor_speed,
+                'wifi_rssi': pool.wifi_rssi,
+                'wifi_connected': int(pool.wifi_connected),
             }
         else:
             rpt = device.report_data
             mode = rpt.dev.sys_status
 
-            if mode == WorkMode.MODE_NOT_ACTIVE and device.online:
-                self._logger.debug(f"Ignoring MODE_NOT_ACTIVE frame for {name}")
-                return
+            # if mode == WorkMode.MODE_NOT_ACTIVE and device.online:
+            #     self._logger.debug(f"Ignoring MODE_NOT_ACTIVE frame for {name}")
+            #     return
 
             # Journal d'événements : détection des transitions d'état
             event = None

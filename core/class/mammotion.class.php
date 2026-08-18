@@ -346,11 +346,17 @@ class mammotion extends eqLogic {
 			$order++;
 			$this->createCmd('battery', 'Batterie', $order, 'info', 'numeric', 1, 1);
 			$order++;
+			$this->createCmd('charging', 'En charge', $order, 'info', 'binary');
+			$order++;
 			$this->createCmd('work_mode', 'Statut', $order, 'info', 'string');
 			$order++;
 			$this->createCmd('speed', 'Vitesse', $order, 'info', 'numeric');
 			$order++;
 			$this->createCmd('clean_mode', 'Mode de nettoyage', $order, 'info', 'string');
+			$order++;
+			$this->createCmd('wifi_rssi', 'Signal Wifi', $order, 'info', 'numeric');
+			$order++;
+			$this->createCmd('wifi_connected', 'Wifi connecté', $order, 'info', 'binary');
 			$order++;
 			
 			$this->createCmd('refresh', 'Rafraichir', $order, 'action', 'other');
