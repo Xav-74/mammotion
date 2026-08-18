@@ -1,4 +1,4 @@
-<div id="mammotion_widget_flat_ID" class="eqLogic-widget eqLogic noResize mammotion_widget_flat mammotion_widget_flat_#id# mammotion" style="min-width:910px !important; max-width:910px !important; min-height:364px; max-height:364px; text-align:center; border:#border#; border-radius:#border-radius#; background-color:#background-color#; color:#color#; #style#;" data-eqType="#eqType#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="dashboard">
+<div id="mammotion_widget_flat_ID" class="eqLogic-widget eqLogic noResize mammotion_widget_flat mammotion_widget_flat_#id# mammotion" style="min-width:458px !important; max-width:458px !important; min-height:675px; max-height:675px; text-align:center; border:#border#; border-radius:#border-radius#; background-color:#background-color#; color:#color#; #style#;" data-eqType="#eqType#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="dashboard">
 
 	<div class="text-center widget-name">
 		<span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
@@ -15,14 +15,15 @@
 			<!-- Column N°1 -->
 			<div class="col-xs-6 column_1#id#" id="column" style="width:452px;">
 				
+				<!-- Line N°1 -->
 				<div class="col-xs-6" id="tile" style="height:150px; width: 220px;">
 					<div id="picture"> 
 						<img id="img#id#"/>
 					</div>
 				</div>
 				<div class="col-xs-6" id="tile" style="height:150px; width: 220px;">
-					<div class="col-xs-2" id="icon_tile" style="height:50px;"><i class="fas fa-tools"></i></div>
-					<div class="col-xs-10" id="titre_tile" style="height:50px; align-content:center;">{{Entretien}}</div>
+					<div class="col-xs-3" id="icon_tile" style="height:50px;"><i class="fas fa-tools"></i></div>
+					<div class="col-xs-9" id="titre_tile" style="height:50px; align-content:center;">{{Entretien}}</div>
 					<div class="col-xs-12" id="sub_tile" style="height:75px;">
 						<div class="col-xs-8" id="titre_tile_3"><span>{{Kilométrage total :}}</span></div>
 						<div class="col-xs-4" id="value_tile"><span class="Cmd#total_mileage_id#"></span></div>
@@ -35,6 +36,40 @@
 					</div>
 				</div>
 
+				<!-- Line N°2 -->
+				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:67px;"><span class="Ico#charging_id#"></span></div>
+					<div class="col-xs-9" id="text_tile" style="height:67px;">
+						<div class="col-xs-12" id="titre_tile">{{Batterie}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#battery_id#"></span><span class="Cmd#charging_id#"></span></div>
+					</div>
+				</div>
+				
+				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-wifi"></i></div>
+					<div class="col-xs-9" id="text_tile" style="height:67px;">
+						<div class="col-xs-12" id="titre_tile">{{Connexion}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#connect_type_id#"></span><span class="Cmd#wifi_rssi_id#"></span></div>
+					</div>
+				</div>
+				
+				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-info"></i></div>
+					<div class="col-xs-9" id="text_tile" style="height:67px;">
+						<div class="col-xs-12" id="titre_tile">{{Statut}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#last_event_id#"></span></div>
+					</div>				
+				</div>
+				
+				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-ruler"></i></div>
+					<div class="col-xs-9" id="text_tile" style="height:67px;">
+						<div class="col-xs-12" id="titre_tile">{{Hauteur de lames}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#blade_height_id#"></span></div>
+					</div>				
+				</div>
+
+				<!-- Line N°3 -->
 				<div class="col-xs-6" id="tile" style="height:150px; width: 446px;">
 					
 					<div class="col-xs-1" id="icon_tile" style="height:85px;"><i class="fas fa-robot"></i></div>
@@ -83,43 +118,7 @@
 
 				</div>
 
-			</div>
-
-			<!-- Column N°2 -->
-			<div class="col-xs-6 column_1#id#" id="column" style="width:452px;">
-				
-				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
-					<div class="col-xs-3" id="icon_tile" style="height:67px;"><span class="Ico#charging_id#"></span></div>
-					<div class="col-xs-9" id="text_tile" style="height:67px;">
-						<div class="col-xs-12" id="titre_tile">{{Batterie}}</div>
-						<div class="col-xs-12" id="value_tile"><span class="Cmd#battery_id#"></span><span class="Cmd#charging_id#"></span></div>
-					</div>
-				</div>
-				
-				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
-					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-wifi"></i></div>
-					<div class="col-xs-9" id="text_tile" style="height:67px;">
-						<div class="col-xs-12" id="titre_tile">{{Connexion}}</div>
-						<div class="col-xs-12" id="value_tile"><span class="Cmd#connect_type_id#"></span><span class="Cmd#wifi_rssi_id#"></span></div>
-					</div>
-				</div>
-				
-				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
-					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-info"></i></div>
-					<div class="col-xs-9" id="text_tile" style="height:67px;">
-						<div class="col-xs-12" id="titre_tile">{{Statut}}</div>
-						<div class="col-xs-12" id="value_tile"><span class="Cmd#last_event_id#"></span></div>
-					</div>				
-				</div>
-				
-				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
-					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-ruler"></i></div>
-					<div class="col-xs-9" id="text_tile" style="height:67px;">
-						<div class="col-xs-12" id="titre_tile">{{Hauteur de lames}}</div>
-						<div class="col-xs-12" id="value_tile"><span class="Cmd#blade_height_id#"></span></div>
-					</div>				
-				</div>
-
+				<!-- Line N°4 -->
 				<div class="col-xs-12" id="tile" style="height:150px; width: 446px;">
 					<div class="col-xs-12" id="titre_tile_2">{{Tonte}}</div>
 					<div class="col-xs-12 mammotion_progress-container">
@@ -144,7 +143,7 @@
 						<div class="col-xs-5" id="value_tile_2">{{Temps écoulé : }}<span class="Cmd#elapsed_time_id#"></span></div>
 					</div>				
 				</div>
-							
+
 			</div>
 
 		</div>
