@@ -753,7 +753,7 @@ class mammotionCmd extends cmd {
 				break;
 
 			case 'set_floor_speed':
-				mammotion::sendToDaemon('command', $device, array('key' => 'set_floor_speed', 'kwargs' => array('speed' => $_options['slider'] / 100)));
+				mammotion::sendToDaemon('command', $device, array('key' => 'set_floor_speed', 'kwargs' => array('speed' => (float) $_options['slider'])));
 				break;
 
 			default:
