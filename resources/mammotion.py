@@ -1,6 +1,5 @@
 import asyncio
 import ssl
-import time
 
 if not hasattr(ssl, 'OP_IGNORE_UNEXPECTED_EOF'):
     ssl.OP_IGNORE_UNEXPECTED_EOF = 0
@@ -12,14 +11,13 @@ from pymammotion.client import MammotionClient
 from pymammotion.data.model import GenerateRouteInformation
 from pymammotion.data.model.device import _device_config
 from pymammotion.data.model.device_config import OperationSettings, create_path_order
-from pymammotion.data.model.pool_state import SpinoWorkMode
-from pymammotion.transport.base import CommandTimeoutError
+from pymammotion.data.model.pool_state import SpinoSysStatus, SpinoWorkMode
+from pymammotion.transport.base import CommandTimeoutError, ConcurrentRequestError, NoTransportAvailableError
 from pymammotion.utility.constant.device_constant import WorkMode, device_connection, device_mode
 from pymammotion.utility.device_type import DeviceType
 
 
-STATE_THROTTLE = 2  # secondes minimum entre deux envois d'état vers Jeedom
-LANG = 'en'         # langue des libellés (événements et erreurs) : 'en', 'fr', 'de', 'es', 'it', 'pt'...
+LANG = 'en'  # langue des libellés (événements et erreurs) : 'en', 'fr', 'de', 'es', 'it', 'pt'...
 
 EVENT_LABELS_ALL = {
     'fr': {
@@ -60,6 +58,41 @@ EVENT_LABELS_ALL = {
 # EVENT_LABELS = EVENT_LABELS_ALL.get(LANG, EVENT_LABELS_ALL['en'])
 EVENT_LABELS = EVENT_LABELS_ALL.get('fr')
 
+# ----- Spino (robot de piscine) -----
+#   0 RECHARGE/OFF, 1 AUTO, 2 FLOOR, 3 WALL, 4 ECO, 5 LINE, 6 CUSTOM
+POOL_CLEAN_MODES = {
+    'clean_all':   SpinoWorkMode.AUTO,    # 1 - Nettoyage complet
+    'clean_floor': SpinoWorkMode.FLOOR,   # 2 - Sol / fond
+    'clean_wall':  SpinoWorkMode.WALL,    # 3 - Parois
+    'clean_eco':   SpinoWorkMode.ECO,     # 4 - Eco / Surface
+    'clean_line':  SpinoWorkMode.LINE,    # 5 - Ligne d'eau
+}
+
+POOL_MODE_LABELS = {
+    SpinoWorkMode.UNKNOWN: 'Inconnu',
+    SpinoWorkMode.OFF: 'Aucun',
+    SpinoWorkMode.AUTO: 'Complet',
+    SpinoWorkMode.FLOOR: 'Sol',
+    SpinoWorkMode.WALL: 'Parois',
+    SpinoWorkMode.ECO: 'Eco',
+    SpinoWorkMode.LINE: 'Ligne d\'eau',
+    SpinoWorkMode.CUSTOM: 'Personnalisé',
+}
+
+POOL_STATUS_LABELS = {
+    SpinoSysStatus.UNKNOWN: 'Inconnu',
+    SpinoSysStatus.IDLE: 'En veille',
+    SpinoSysStatus.PREPARE: 'Préparation',
+    SpinoSysStatus.WAIT_WATER: 'Attente de mise à l\'eau',
+    SpinoSysStatus.WORKING: 'Nettoyage en cours',
+    SpinoSysStatus.PAUSE_GO_CHARGE: 'Retour à la station (pause)',
+    SpinoSysStatus.END_GO_CHARGE: 'Retour à la station (fin)',
+    SpinoSysStatus.CHARGING: 'En charge',
+    SpinoSysStatus.LEAVE_DOCK: 'Départ de la station',
+    SpinoSysStatus.RECALLING: 'Rappel en cours',
+}
+
+
 class DaemonConfig(BaseConfig):
 
     def __init__(self):
@@ -80,8 +113,6 @@ class MammotionDaemon(BaseDaemon):
         super().__init__(self._config, self.on_start, self.on_message, self.on_stop)
         self._client = None
         self._subscriptions = []
-        self._last_sent = {}
-        self._pending = {}
         self._last_mode = {}
         self._error_codes = {}
 
@@ -135,7 +166,7 @@ class MammotionDaemon(BaseDaemon):
 
             elif action == 'start':
                 if DeviceType.is_swimming_pool(device):
-                    await self._command(device, 'clean_mode', {'work_mode': SpinoWorkMode.AUTO.value})
+                    await self._pool_command(device, 'clean_all')
                 else:
                     await self._start(device, args.get('hash'), args)
 
@@ -193,18 +224,9 @@ class MammotionDaemon(BaseDaemon):
 
     async def _command(self, name: str, key: str, kwargs: dict):
         if DeviceType.is_swimming_pool(name):
-            if key == 'clean_mode':
-                await self._client.send_command_with_args(name, 'set_swimming_work_mode', work_mode=int(kwargs['work_mode']))
-            elif key == 'dock':
-                await self._client.send_command_with_args(name, 'set_swimming_work_mode', work_mode=SpinoWorkMode.RECHARGE.value)
-            elif key == 'set_floor_speed':
-                await self._client.send_command_with_args(name, 'sp_speed_update', speed=float(kwargs['speed']))
-            else:
-                self._logger.warning(f"Command '{key}' is not supported by pool cleaners - dropped")
-                return
-            await self._client.send_command_with_args(name, 'get_report_cfg_spino', count=1)
-            return        
-        
+            await self._pool_command(name, key)
+            return
+
         device = self._client.get_device_by_name(name)
         mode = device.report_data.dev.sys_status
 
@@ -247,6 +269,71 @@ class MammotionDaemon(BaseDaemon):
         await self._client.ensure_fresh_state(name, max_age_s=0)
 
 
+    async def _pool_command(self, name: str, key: str):
+        """Commandes du robot de piscine (Spino)"""
+        if key == 'dock':
+            mode = SpinoWorkMode.RECHARGE                       # 0 - retour à la station
+        elif key in POOL_CLEAN_MODES:
+            mode = POOL_CLEAN_MODES[key]
+        else:
+            self._logger.warning(f"Spino {name} : commande '{key}' non supportée par un robot de piscine - ignorée")
+            return
+
+        handle = self._client.device_registry.get_by_name(name)
+        if handle is None:
+            self._logger.error(f"Spino {name} : robot inconnu du démon - lancez une synchronisation")
+            return
+
+        # Sans transport utilisable, send_command_with_args abandonne silencieusement.
+        # On le détecte ici pour produire un log exploitable et remonter l'état hors ligne.
+        if not handle.has_usable_transport:
+            self._logger.warning(f"Spino {name} : aucun transport disponible (robot hors ligne côté cloud) - commande '{key}' non envoyée")
+            await self.send_to_jeedom({'event': 'state', 'device': name, 'data': {'online': 0}})
+            return
+
+        device = self._client.get_device_by_name(name)
+        current = device.pool_state if device is not None else None
+        self._logger.info(
+            f"Spino {name} : {key} -> set_swimming_work_mode(work_mode={int(mode)}) [{mode.name}]"
+            + (f" - état actuel : {current.sys_status.name} / mode {current.work_mode.name}, batterie {current.battery}%" if current else "")
+        )
+
+        try:
+            response = await self._client.send_command_and_wait(
+                name, 'set_swimming_work_mode', 'response_set_mode',
+                work_mode=int(mode), send_timeout=8.0,
+            )
+        except CommandTimeoutError:
+            self._logger.warning(f"Spino {name} : aucun accusé (response_set_mode) après l'envoi de '{key}' - nouvel essai sans attente")
+            await self._client.send_command_with_args(name, 'set_swimming_work_mode', work_mode=int(mode))
+        except ConcurrentRequestError:
+            self._logger.warning(f"Spino {name} : un changement de mode est déjà en cours - commande '{key}' ignorée")
+            return
+        except NoTransportAvailableError:
+            self._logger.warning(f"Spino {name} : transport perdu pendant l'envoi de '{key}'")
+            await self.send_to_jeedom({'event': 'state', 'device': name, 'data': {'online': 0}})
+            return
+        else:
+            ack = getattr(response.sys, 'response_set_mode', None) if getattr(response, 'sys', None) else None
+            if ack is None:
+                self._logger.warning(f"Spino {name} : accusé reçu mais illisible pour '{key}'")
+            else:
+                accepted = SpinoWorkMode(ack.cur_work_mode)
+                self._logger.info(
+                    f"Spino {name} : accusé reçu pour '{key}' - statue={ack.statue}, "
+                    f"mode demandé={ack.set_work_mode}, mode appliqué={ack.cur_work_mode} [{accepted.name}]"
+                )
+                if ack.statue == 0 and accepted != mode:
+                    self._logger.warning(
+                        f"Spino {name} : le robot a appliqué le mode {accepted.name} ({int(accepted)}) "
+                        f"au lieu de {mode.name} ({int(mode)}) - mode probablement refusé dans l'état courant"
+                    )
+
+        # Relance une remontée d'état (RIT_CONNECT + RIT_DEV_STA, count=1)
+        await self._client.send_command_with_args(name, 'get_report_cfg_spino', count=1)
+        await self._send_state(name)
+
+
     async def _send_devices(self):
         # Robots pré-2025 : product_model et product_image.
         # Robots post-2025 : model_id
@@ -256,6 +343,7 @@ class MammotionDaemon(BaseDaemon):
             device = self._client.get_device_by_name(handle.device_name)
             is_pool = DeviceType.is_swimming_pool(handle.device_name)
             mower_state = getattr(device, 'mower_state', None)
+            firmwares = getattr(device, 'device_firmwares', None)
             cloud = aliyun.get(handle.device_name)
             limits = device.device_limits if device else None
             if (limits is None or limits.blade_height.max == 0) and cloud is not None:
@@ -266,7 +354,7 @@ class MammotionDaemon(BaseDaemon):
                 'name': handle.device_name,
                 'device_type': 'pool' if is_pool else 'mower',
                 'model': (cloud.product_model if cloud else '') or (mower_state.model_id if mower_state else '') or (mower_state.model if mower_state else ''),
-                'swversion': mower_state.swversion if mower_state else '',
+                'swversion': (mower_state.swversion if mower_state else '') or (firmwares.device_version if firmwares else ''),
                 'has_blade_control': int(not is_pool and not DeviceType.is_yuka(handle.device_name)),
                 'blade_height_min': limits.blade_height.min if limits else 0,
                 'blade_height_max': limits.blade_height.max if limits else 0,
@@ -336,6 +424,7 @@ class MammotionDaemon(BaseDaemon):
     async def _sync_device_info(self, name: str):
         # Interroge le robot (le réveille si besoin) pour récupérer modèle et firmware
         if DeviceType.is_swimming_pool(name):
+            await self._sync_pool_device_info(name)
             return
         device = self._client.get_device_by_name(name)
 
@@ -368,30 +457,54 @@ class MammotionDaemon(BaseDaemon):
         await self._client.ensure_fresh_state(name, max_age_s=0)
 
 
-    async def _send_state(self, name: str):
-        now = time.monotonic()
-        if now - self._last_sent.get(name, 0) < STATE_THROTTLE:
-            if name not in self._pending:
-                self._pending[name] = asyncio.create_task(self._delayed_send(name))
+    async def _sync_pool_device_info(self, name: str):
+        device = self._client.get_device_by_name(name)
+        if device is None:
             return
-        self._last_sent[name] = now
 
+        if not device.device_firmwares.device_version:
+            try:
+                await self._client.send_command_and_wait(name, 'get_device_version_info', 'toapp_dev_fw_info')
+            except Exception as e:
+                self._logger.warning(f"Spino {name} : lecture de la version firmware impossible (robot endormi ?) : {e}")
+
+        # Repli : version firmware via le check OTA cloud, disponible même robot endormi
+        if not device.device_firmwares.device_version:
+            try:
+                handle = self._client.device_registry.get_by_name(name)
+                ota_info = await self._client.mammotion_http.get_device_ota_firmware([handle.iot_id])
+                for check in (ota_info.data or []):
+                    if check.device_id == handle.iot_id:
+                        device.apply_version_check(check)
+            except Exception as e:
+                self._logger.warning(f"Spino {name} : check OTA échoué : {e}")
+
+        # Force une remontée d'état (canaux Spino, pas ceux de la gamme tondeuse)
+        await self._client.send_command_with_args(name, 'get_report_cfg_spino', count=1)
+
+
+    async def _send_state(self, name: str):
         device = self._client.get_device_by_name(name)
         if device is None:
             return
 
         if DeviceType.is_swimming_pool(name):
             pool = device.pool_state
+            # floor_speed n'est renseigné que par un ack `app_downlink_cmd` : il reste
+            # à 0 tant qu'on ne le lit pas explicitement, donc on ne le remonte plus.
             data = {
                 'online': int(device.online),
                 'battery': pool.battery,
                 'charging': int(pool.charging),
-                'work_mode': pool.sys_status.name,
-                'clean_mode': pool.work_mode.name,
-                'speed': pool.floor_speed,
+                'work_mode': POOL_STATUS_LABELS.get(pool.sys_status, pool.sys_status.name),
+                'clean_mode': POOL_MODE_LABELS.get(pool.work_mode, pool.work_mode.name),
                 'wifi_rssi': pool.wifi_rssi,
+                'ble_rssi': pool.ble_rssi,
                 'wifi_connected': int(pool.wifi_connected),
+                'firmware': device.device_firmwares.device_version,
             }
+            if not data['firmware']:
+                data.pop('firmware')
         else:
             rpt = device.report_data
             mode = rpt.dev.sys_status
@@ -447,12 +560,6 @@ class MammotionDaemon(BaseDaemon):
         
         self._logger.debug(f"Sending state to Jeedom for {name} : {data}")
         await self.send_to_jeedom({'event': 'state', 'device': name, 'data': data})
-
-
-    async def _delayed_send(self, name: str):
-        await asyncio.sleep(STATE_THROTTLE)
-        self._pending.pop(name, None)
-        await self._send_state(name)
 
 
     async def _start(self, name: str, area_hash=None, kwargs=None):

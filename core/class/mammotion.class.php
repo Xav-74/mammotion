@@ -350,25 +350,32 @@ class mammotion extends eqLogic {
 			$order++;
 			$this->createCmd('work_mode', 'Statut', $order, 'info', 'string');
 			$order++;
-			$this->createCmd('speed', 'Vitesse', $order, 'info', 'numeric');
-			$order++;
 			$this->createCmd('clean_mode', 'Mode de nettoyage', $order, 'info', 'string');
 			$order++;
 			$this->createCmd('wifi_rssi', 'Signal Wifi', $order, 'info', 'numeric');
 			$order++;
+			$this->createCmd('ble_rssi', 'Signal Bluetooth', $order, 'info', 'numeric');
+			$order++;
 			$this->createCmd('wifi_connected', 'Wifi connecté', $order, 'info', 'binary');
 			$order++;
-			
+			$this->createCmd('firmware', 'Firmware', $order, 'info', 'string');
+			$order++;
+
 			$this->createCmd('refresh', 'Rafraichir', $order, 'action', 'other');
 			$order++;
-			$this->createCmd('start', 'Démarrer', $order, 'action', 'other');
+			$this->createCmd('dock', 'Arrêt et retour en charge', $order, 'action', 'other');
 			$order++;
-			$this->createCmd('dock', 'Retour station', $order, 'action', 'other');
+			// Un bouton par mode de nettoyage (SpinoWorkMode : 1 AUTO, 2 FLOOR, 3 WALL, 4 ECO)
+			$this->createCmd('clean_all', 'Nettoyage complet', $order, 'action', 'other');
 			$order++;
-			$this->createCmd('set_clean_mode', 'Lancer un nettoyage', $order, 'action', 'select', 1, 0, [], array('listValue' => '1|Complet;2|Fond;3|Parois;4|Eco;5|Ligne d\'eau'));
+			$this->createCmd('clean_floor', 'Nettoyage du sol', $order, 'action', 'other');
 			$order++;
-			$this->createCmd('set_floor_speed', 'Régler vitesse au sol (cm/s)', $order, 'action', 'slider', 1, 0, [], array('minValue' => 10, 'maxValue' => 100));
-			$order++;			
+			$this->createCmd('clean_wall', 'Nettoyage des parois', $order, 'action', 'other');
+			$order++;
+			$this->createCmd('clean_eco', 'Nettoyage éco', $order, 'action', 'other');
+			$order++;
+			// $this->createCmd('clean_line', 'Nettoyage ligne d\'eau', $order, 'action', 'other');
+			// $order++;
 		}
 
 		if ($deviceType == 'mower') {
@@ -602,12 +609,17 @@ class mammotion extends eqLogic {
 			$this->checkAndUpdateCmd($key, $value);
 		}
 		log::add('mammotion', 'debug', 'State updated for '.$this->getName().' : '.json_encode($data));
-		
+
+		// Usure des lames : commandes présentes uniquement sur les tondeuses.
+		// Sans ce garde-fou, un robot de piscine déclenchait une erreur fatale PHP
+		// (execCmd() sur null) non rattrapée par le catch(Exception) de jeeMammotion.php.
 		$usedCmd = $this->getCmd(null, 'blade_used_time');
 		$warnCmd = $this->getCmd(null, 'blade_used_warn_time');
-		$used_time = (float) $usedCmd->execCmd();
-		$warn_time = (float) $warnCmd->execCmd();
-		$this->checkAndUpdateCmd('blade_used_left_time', max(0, $warn_time - $used_time));
+		if (is_object($usedCmd) && is_object($warnCmd)) {
+			$used_time = (float) $usedCmd->execCmd();
+			$warn_time = (float) $warnCmd->execCmd();
+			$this->checkAndUpdateCmd('blade_used_left_time', max(0, $warn_time - $used_time));
+		}
 	}
 	
 	/* Mise à jour de la liste des zones */
@@ -715,7 +727,8 @@ class mammotionCmd extends cmd {
 		$eqLogic = $this->getEqLogic();
 		$device = $eqLogic->getLogicalId();
 
-		$taskCommands = array('pause', 'resume', 'cancel', 'dock', 'leave_dock');
+		$taskCommands = array('pause', 'resume', 'cancel', 'dock', 'leave_dock',
+							  'clean_all', 'clean_floor', 'clean_wall', 'clean_eco', 'clean_line');
 
 		$action = $this->getLogicalId();
 		log::add('mammotion', 'debug', '┌─Command execution : '.$action.' ('.$eqLogic->getName().')');
@@ -746,14 +759,6 @@ class mammotionCmd extends cmd {
 			case 'set_speed':
 				$eqLogic->checkAndUpdateCmd('speed_target', $_options['slider']);
 				mammotion::sendToDaemon('command', $device, array('key' => 'set_speed', 'kwargs' => array('speed' => (float) $_options['slider'])));
-				break;
-
-			case 'set_clean_mode':
-				mammotion::sendToDaemon('command', $device, array('key' => 'clean_mode', 'kwargs' => array('work_mode' => (int) $_options['select'])));
-				break;
-
-			case 'set_floor_speed':
-				mammotion::sendToDaemon('command', $device, array('key' => 'set_floor_speed', 'kwargs' => array('speed' => (float) $_options['slider'])));
 				break;
 
 			default:
