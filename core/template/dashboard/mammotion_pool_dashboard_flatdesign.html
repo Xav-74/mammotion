@@ -1,0 +1,231 @@
+<div id="mammotion_widget_flat_ID" class="eqLogic-widget eqLogic noResize mammotion_widget_flat mammotion_widget_flat_#id# mammotion" style="min-width:458px !important; max-width:458px !important; min-height:304px; max-height:304px; text-align:center; border:#border#; border-radius:#border-radius#; background-color:#background-color#; color:#color#; #style#;" data-eqType="#eqType#" data-translate-category="#translate_category#" data-category="#category#" data-tags="#tags#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-version="dashboard">
+
+	<div class="text-center widget-name">
+		<span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+		<a href="#eqLink#" class="reportModeHidden" style="color:var(--eqTitle-color)!important;">#name_display# <span class="object_name">#object_name#</span></a>
+	   	<span class="cmd refresh pull-right cursor" title="{{Rafraichir}}" data-cmd_id="#refresh_id#" onclick="jeedom.cmd.execute({id: #refresh_id#});">
+		   <i class="fas fa-sync" style="color:var(--eqTitle-color)!important;"></i>
+	   	</span>
+	</div>
+			
+	<div class="container-fluid">
+		
+		<div>
+			
+			<!-- Column N°1 -->
+			<div class="col-xs-6 column_1#id#" id="column" style="width:452px;">
+				
+				<!-- Line N°1 -->
+				<div class="col-xs-6" id="tile" style="height:150px; width: 220px;">
+					<div id="picture"> 
+						<img id="img#id#"/>
+					</div>
+				</div>
+				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:67px;"><span class="Ico#charging_id#"></span></div>
+					<div class="col-xs-9" id="text_tile" style="height:67px;">
+						<div class="col-xs-12" id="titre_tile">{{Batterie}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#battery_id#"></span><span class="Cmd#charging_id#"></span></div>
+					</div>
+				</div>
+				
+				<div class="col-xs-6" id="tile" style="height:72px; width: 220px;">
+					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-wifi"></i></div>
+					<div class="col-xs-9" id="text_tile" style="height:67px;">
+						<div class="col-xs-12" id="titre_tile">{{Connexion}}</div>
+						<div class="col-xs-12" id="value_tile"><span class="Cmd#wifi_connected_id#"></span><span class="Cmd#wifi_rssi_id#"></span></div>
+					</div>
+				</div>
+
+				<!-- Line N°2 -->
+				<div class="col-xs-6" id="tile" style="height:90px; width: 446px;">
+					
+					<div class="col-xs-1" id="icon_tile" style="height:85px;"><i class="fas fa-robot"></i></div>
+					<div class="col-xs-5" id="text_tile" style="height:85px;">
+						<div class="col-xs-12" id="titre_tile" style="padding-left: 10px !important;"><span>#device_name#id##</span></div>
+						<div class="col-xs-12" id="value_tile" style="padding-left: 10px !important;"><span class="Cmd#work_mode_id#"></span></div>
+					</div>
+					<div class="col-xs-6" id="text_tile" style="height:86px; padding-left: 10px !important;">
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#clean_all_id#" title="{{Nettoyage complet}}"
+								onclick="jeedom.cmd.execute({id: #clean_all_id#});"
+								style="display:inline-flex;align-items:center;justify-content:center;">
+							<svg class="spino-icon" viewBox="10 10 44 44" fill="none" aria-hidden="true">
+								<path d="M15.25 22 H48.75 V46.75 H15.25 Z" fill="#5078AA" fill-opacity="0.25"/>
+								<path d="M20 27 V41.5 H44 V27" stroke="#5078AA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M13 15 V49 H51 V15" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#clean_floor_id#" title="{{Nettoyage du sol}}"
+								onclick="jeedom.cmd.execute({id: #clean_floor_id#});"
+								style="display:inline-flex;align-items:center;justify-content:center;">
+							<svg class="spino-icon" viewBox="10 10 44 44" fill="none" aria-hidden="true">
+								<path d="M15.25 22 H48.75 V46.75 H15.25 Z" fill="#5078AA" fill-opacity="0.25"/>
+								<path d="M20 41.5 H44" stroke="#5078AA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M13 15 V49 H51 V15" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#clean_wall_id#" title="{{Nettoyage des parois}}"
+								onclick="jeedom.cmd.execute({id: #clean_wall_id#});"
+								style="display:inline-flex;align-items:center;justify-content:center;">
+							<svg class="spino-icon" viewBox="10 10 44 44" fill="none" aria-hidden="true">
+								<path d="M15.25 22 H48.75 V46.75 H15.25 Z" fill="#5078AA" fill-opacity="0.25"/>
+								<path d="M20 27 V41.5 M44 27 V41.5" stroke="#5078AA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M13 15 V49 H51 V15" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#clean_eco_id#" title="{{Nettoyage éco}}"
+								onclick="jeedom.cmd.execute({id: #clean_eco_id#});"
+								style="display:inline-flex;align-items:center;justify-content:center;">
+							<svg class="spino-icon" viewBox="10 10 44 44" fill="none" aria-hidden="true">
+								<path d="M15.25 22 H48.75 V46.75 H15.25 Z" fill="#5078AA" fill-opacity="0.25"/>
+								<path d="M20 30.5 H44"        stroke="#5078AA" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M39.4 25.9 L44 30.5" stroke="#5078AA" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M44 37.5 H20"        stroke="#5078AA" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M24.6 42.1 L20 37.5" stroke="#5078AA" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M13 15 V49 H51 V15" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+						<button id="mammotion_btn" class="btn cmd action" data-cmd_id="#dock_id#" title="{{Arrêt et retour en charge}}"
+									onclick="jeedom.cmd.execute({id: #dock_id#});"
+									style="display:inline-flex;align-items:center;justify-content:center;">
+							<svg class="spino-icon" viewBox="10 10 44 44" fill="none" aria-hidden="true">
+								<path d="M15.25 22 H48.75 V46.75 H15.25 Z" fill="#5078AA" fill-opacity="0.25"/>
+								<path d="M32 44 V19 M24.5 26.5 L32 19 L39.5 26.5" stroke="#5078AA" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+								<path d="M13 15 V49 H51 V15" stroke="currentColor" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+						</button>
+					</div>
+
+				</div>
+
+			</div>
+
+		</div>
+
+		<div class="col-xs-12" style="height:25px;">
+			<div id="last_update">{{Dernière mise à jour : }}<span class="Cmd#lastUpdate_id#"></span></div>
+		</div>
+		
+	</div>
+	
+	<script>
+
+		//----- Theme colors & optional parameters
+		function setTheme#id#() {
+			var link = document.createElement('link');
+			link.type = 'text/css';
+			link.rel = 'stylesheet';
+			
+			if ($('body').attr('data-theme').endsWith('Dark')) {
+				link.href = 'plugins/mammotion/core/template/dashboard/mammotion_dashboard_style_dark.css';
+			}
+			else if ($('body').attr('data-theme').endsWith('Light')) {
+				link.href = 'plugins/mammotion/core/template/dashboard/mammotion_dashboard_style_light.css';
+			}
+			document.head.appendChild(link);
+		}
+
+		//----- Events
+		$('body').on('changeThemeEvent', function (event,theme) {
+			setTheme#id#();
+		});
+
+		//----- Initialization
+		function timedSetTheme#id#(occurence = 0){
+			if ($('.mammotion_widget_flat_#id#').length == 0) {
+				return;
+			}
+			if ( $('body')[0].hasAttribute('data-theme') != true )  {
+				occurence++;
+				if (occurence > 40){
+					return;
+				}
+				setTimeout( () => { timedSetTheme#id#(occurence); }, 500 );
+				return;
+			}
+			setTheme#id#();
+			updateImage#id#();
+			updateDisplayDashboard#id#();
+		}
+		
+		if ( $('body')[0].hasAttribute('data-theme') == true )  {
+			setTheme#id#();
+			updateImage#id#();
+			updateDisplayDashboard#id#();
+		}
+		else  {
+			timedSetTheme#id#(0);
+		}
+
+		//----- Image
+		function updateImage#id#()  {
+			var image = '';
+			var device = ('#device_name#id##' || '').toLowerCase();
+			['yuka', 'luba', 'spino'].forEach(function (family) {
+				if (!image && device.indexOf(family) !== -1) {
+					image = 'plugins/mammotion/data/mammotion_' + family + '.png';
+				}
+			});
+		
+			var img = document.getElementById('img#id#');
+			img.onerror = function() {
+				this.onerror = null;
+				this.src = 'plugins/mammotion/data/image_robot_not_found.png';
+			};
+			img.src = image || 'plugins/mammotion/data/image_robot_not_found.png';
+		}
+
+
+		//----- Dashboard display update
+		function updateDisplayDashboard#id#()  {
+	
+			//----- Battery
+			jeedom.cmd.update['#battery_id#'] =function(_options) {
+				$('.Cmd#battery_id#').empty().append('<span>'+_options.display_value+' %</span>');
+			}
+			jeedom.cmd.update['#battery_id#']({display_value: '#battery#'});
+
+			jeedom.cmd.update['#charging_id#'] =function(_options) {
+				if ( _options.display_value == 1 )  {
+					$('.Ico#charging_id#').empty().append('<span><i class="fas fa-plug"></i></span>');
+					$('.Cmd#charging_id#').empty().append('<span>&nbsp;&nbsp;(en charge)</span>');
+				}
+				else  {
+					$('.Ico#charging_id#').empty().append('<span><i class="fas fa-battery-half"></i></span>');
+					$('.Cmd#charging_id#').empty().append('<span></span>');
+				}
+			}
+			jeedom.cmd.update['#charging_id#']({display_value: '#charging#'});
+
+			//----- Connexion
+			jeedom.cmd.update['#wifi_connected_id#'] =function(_options) {
+				if ( _options.display_value == 1 )  {
+					$('.Cmd#wifi_connected_id#').empty().append('<span>WIFI'+' </span>');
+				}
+				else  {
+					$('.Cmd#wifi_connected_id#').empty().append('<span>None</span>');
+				}
+			}
+			jeedom.cmd.update['#wifi_connected_id#']({display_value: '#wifi_connected#'});
+
+			jeedom.cmd.update['#wifi_rssi_id#'] =function(_options) {
+				$('.Cmd#wifi_rssi_id#').empty().append('<span>&nbsp;&nbsp;('+_options.display_value+' dBm)</span>');
+			}
+			jeedom.cmd.update['#wifi_rssi_id#']({display_value: '#wifi_rssi#'});
+
+			//----- Statut
+			jeedom.cmd.update['#work_mode_id#'] =function(_options) {
+				$('.Cmd#work_mode_id#').empty().append('<span>'+_options.display_value+'</span>');
+			}
+			jeedom.cmd.update['#work_mode_id#']({display_value: '#work_mode#'});
+			
+			//----- Last update
+			jeedom.cmd.update['#lastUpdate_id#'] = function(_options) {
+				$('.Cmd#lastUpdate_id#').empty().append('<span>'+_options.display_value+'</span>');
+			}
+			jeedom.cmd.update['#lastUpdate_id#']({display_value:'#lastUpdate#'});
+		}	
+
+	</script>
+
+</div>

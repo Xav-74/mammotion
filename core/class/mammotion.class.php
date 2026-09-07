@@ -358,9 +358,7 @@ class mammotion extends eqLogic {
 			$order++;
 			$this->createCmd('wifi_connected', 'Wifi connecté', $order, 'info', 'binary');
 			$order++;
-			$this->createCmd('firmware', 'Firmware', $order, 'info', 'string');
-			$order++;
-
+		
 			$this->createCmd('refresh', 'Rafraichir', $order, 'action', 'other');
 			$order++;
 			$this->createCmd('dock', 'Arrêt et retour en charge', $order, 'action', 'other');
@@ -503,7 +501,7 @@ class mammotion extends eqLogic {
     /* Non obligatoire mais permet de modifier l'affichage du widget si vous en avez besoin */
     public function toHtml($_version = 'dashboard') {
     	
-		if ( $this->getConfiguration('device_type') != 'mower') {
+		if ( $this->getConfiguration('device_type') != 'mower' && $this->getConfiguration('device_type') != 'pool' ) {
 			return parent::toHtml($_version);
 		}
 
@@ -551,7 +549,8 @@ class mammotion extends eqLogic {
 		}
 		
 		// On definit le template à appliquer
-		$template = 'mammotion_mower_dashboard_flatdesign';
+		if ( $this->getConfiguration('device_type') == 'mower' ) { $template = 'mammotion_mower_dashboard_flatdesign'; }
+		if ( $this->getConfiguration('device_type') == 'pool' ) { $template = 'mammotion_pool_dashboard_flatdesign'; }
 		$replace['#template#'] = $template;
 
 		$filepath = 'plugins/'.__CLASS__.'/core/template/'.$version.'/'.$template.'.html';

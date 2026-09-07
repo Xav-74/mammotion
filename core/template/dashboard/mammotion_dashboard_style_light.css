@@ -246,7 +246,10 @@
 	cursor:pointer;
 }
 
-
-.mammotion_widget_flat  #luba.disabled, [id^="luba"].disabled {
+.mammotion_widget_flat #luba.disabled, [id^="luba"].disabled {
     opacity: 50%;
+}
+
+.mammotion_widget_flat .spino-icon { 
+	width: 20px; height: 20px; display: block;
 }
