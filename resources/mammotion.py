@@ -345,11 +345,15 @@ class MammotionDaemon(BaseDaemon):
             mower_state = getattr(device, 'mower_state', None)
             firmwares = getattr(device, 'device_firmwares', None)
             cloud = aliyun.get(handle.device_name)
-            limits = device.device_limits if device else None
-            if (limits is None or limits.blade_height.max == 0) and cloud is not None:
-                fallback = _device_config.get_working_parameters(cloud.product_key) or _device_config.get_best_default(cloud.product_key)
-                if fallback is not None:
-                    limits = fallback
+            # Bornes hauteur de lame / vitesse : notion propre aux tondeuses.
+            # PoolCleanerDevice n'a pas de device_limits (ni de mower_state).
+            limits = None
+            if not is_pool:
+                limits = getattr(device, 'device_limits', None) if device else None
+                if (limits is None or limits.blade_height.max == 0) and cloud is not None:
+                    fallback = _device_config.get_working_parameters(cloud.product_key) or _device_config.get_best_default(cloud.product_key)
+                    if fallback is not None:
+                        limits = fallback
             devices.append({
                 'name': handle.device_name,
                 'device_type': 'pool' if is_pool else 'mower',
