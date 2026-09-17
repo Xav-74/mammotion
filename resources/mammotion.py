@@ -345,6 +345,7 @@ class MammotionDaemon(BaseDaemon):
             mower_state = getattr(device, 'mower_state', None)
             firmwares = getattr(device, 'device_firmwares', None)
             cloud = aliyun.get(handle.device_name)
+            model_from_name = DeviceType.value_of_str(handle.device_name).get_model().replace('-', ' ') if is_pool else ''
             # Bornes hauteur de lame / vitesse : notion propre aux tondeuses.
             # PoolCleanerDevice n'a pas de device_limits (ni de mower_state).
             limits = None
@@ -357,7 +358,7 @@ class MammotionDaemon(BaseDaemon):
             devices.append({
                 'name': handle.device_name,
                 'device_type': 'pool' if is_pool else 'mower',
-                'model': (cloud.product_model if cloud else '') or (mower_state.model_id if mower_state else '') or (mower_state.model if mower_state else ''),
+                'model': (cloud.product_model if cloud else '') or (mower_state.model_id if mower_state else '') or (mower_state.model if mower_state else '') or model_from_name,
                 'swversion': (mower_state.swversion if mower_state else '') or (firmwares.device_version if firmwares else ''),
                 'has_blade_control': int(not is_pool and not DeviceType.is_yuka(handle.device_name)),
                 'blade_height_min': limits.blade_height.min if limits else 0,
