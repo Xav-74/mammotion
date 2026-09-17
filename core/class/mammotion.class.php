@@ -700,6 +700,15 @@ class mammotion extends eqLogic {
 		return $settings;
 	}
 
+	/* Bloque le pilotage d'un équipement en hivernage */
+	public function checkHibernation()
+	{
+		if ($this->getConfiguration('hibernation', 0) == 1) {
+			log::add('mammotion', 'debug', '└─'.$this->getName().' is in hibernation mode : command rejected');
+			throw new Exception('Equipment is in hibernation mode : '.$this->getName());
+		}
+	}
+
 	/* Envoi des notifications */
 	public function sendNotification($event) {
 
@@ -763,35 +772,45 @@ class mammotionCmd extends cmd {
 		switch ($action) {
 
 			case 'refresh':
+				if ($eqLogic->getConfiguration('hibernation', 0) == 1) {
+					log::add('mammotion', 'debug', '│ Hibernation mode : refresh skipped');
+					break;
+				}
 				mammotion::sendToDaemon('refresh', $device);
 				break;
 
 			case 'start':
+				$eqLogic->checkHibernation();
 				mammotion::sendToDaemon('start', $device, $eqLogic->getStartSettings());
 				break;
 
 			case 'start_zone':
+				$eqLogic->checkHibernation();
 				mammotion::sendToDaemon('start', $device, array_merge(array('hash' => $_options['select']), $eqLogic->getStartSettings()));
 				break;
 
 			case 'start_activity':
+				$eqLogic->checkHibernation();
 				mammotion::sendToDaemon('start_plan', $device, array('plan_id' => $_options['select']));
 				break;
 
 			case 'set_blade_height':
+				$eqLogic->checkHibernation();
 				$eqLogic->checkAndUpdateCmd('blade_height_target', $_options['slider']);
 				mammotion::sendToDaemon('command', $device, array('key' => 'set_blade_height', 'kwargs' => array('height' => (int) $_options['slider'])));
 				break;
 
 			case 'set_speed':
+				$eqLogic->checkHibernation();
 				$eqLogic->checkAndUpdateCmd('speed_target', $_options['slider']);
 				mammotion::sendToDaemon('command', $device, array('key' => 'set_speed', 'kwargs' => array('speed' => (float) $_options['slider'])));
 				break;
 
 			default:
 				if (!in_array($action, $taskCommands)) {
-					throw new Exception(__('Commande inconnue : ', __FILE__).$action);
+					throw new Exception('Unknown command '.$action);
 				}
+				$eqLogic->checkHibernation();
 				mammotion::sendToDaemon('command', $device, array('key' => $action));
 				break;
 		}

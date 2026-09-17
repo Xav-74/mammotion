@@ -213,6 +213,18 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
 								<br>
 
+								<legend><i class="fas fa-snowflake"></i> {{Hivernage}}</legend>
+								<div class="form-group">
+									<label class="col-sm-6 control-label">{{Mode hivernage}}
+										<sup><i class="fas fa-question-circle tooltips" title="{{Le robot n'est plus interrogé par le cron et ses commandes sont bloquées}}"></i></sup>
+									</label>
+									<div class="col-sm-6">
+										<input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="hibernation"/>
+									</div>
+								</div>
+
+								<br>
+
 								<legend><i class="fas fa-comments"></i> {{Notifications d'activité}}</legend>
 								<div class="form-group" style="margin-bottom:1px !important">
 									<label class="col-sm-6 control-label">{{Commande à utiliser pour l'envoi de notifications}}
