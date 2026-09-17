@@ -316,6 +316,30 @@ class mammotion extends eqLogic {
 		}
 	}
 
+	/* Clé de tri : minuscules, sans accents */
+	private static function sortKey($name)
+	{
+		if (class_exists('Normalizer')) {
+			$name = preg_replace('/\p{Mn}/u', '', Normalizer::normalize($name, Normalizer::FORM_D));
+		} else {
+			$name = strtr($name, array(
+				'à'=>'a','â'=>'a','ä'=>'a','é'=>'e','è'=>'e','ê'=>'e','ë'=>'e','î'=>'i','ï'=>'i',
+				'ô'=>'o','ö'=>'o','ù'=>'u','û'=>'u','ü'=>'u','ç'=>'c','œ'=>'oe','æ'=>'ae',
+				'À'=>'A','Â'=>'A','Ä'=>'A','É'=>'E','È'=>'E','Ê'=>'E','Ë'=>'E','Î'=>'I','Ï'=>'I',
+				'Ô'=>'O','Ö'=>'O','Ù'=>'U','Û'=>'U','Ü'=>'U','Ç'=>'C','Œ'=>'OE','Æ'=>'AE'));
+		}
+		return mb_strtolower($name, 'UTF-8');
+	}
+
+	/* Tri alphabétique sur le nom */
+	private static function sortByName($items)
+	{
+		usort($items, function ($a, $b) {
+			return strnatcasecmp(self::sortKey($a['name']), self::sortKey($b['name']));
+		});
+		return $items;
+	}
+
 
     /*     * *********************Méthodes d'instance************************* */
 
@@ -626,6 +650,7 @@ class mammotion extends eqLogic {
 	/* Mise à jour de la liste des zones */
 	public function handleAreas($areas)
 	{
+		$areas = self::sortByName($areas);
 		$listValue = array();
 		foreach ($areas as $area) {
 			$listValue[] = $area['hash'].'|'.$area['name'];
@@ -644,6 +669,7 @@ class mammotion extends eqLogic {
 	/* Mise à jour de la liste des activités (commande select start_activity) */
 	public function handlePlans($plans)
 	{
+		$plans = self::sortByName($plans);
 		$listValue = array();
 		foreach ($plans as $plan) {
 			$listValue[] = $plan['plan_id'].'|'.$plan['name'];
