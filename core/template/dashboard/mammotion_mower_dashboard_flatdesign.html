@@ -26,13 +26,13 @@
 					<div class="col-xs-9" id="titre_tile" style="height:50px; align-content:center;">{{Entretien}}</div>
 					<div class="col-xs-12" id="sub_tile" style="height:75px;">
 						<div class="col-xs-8" id="titre_tile_3"><span>{{Kilométrage total :}}</span></div>
-						<div class="col-xs-4" id="value_tile"><span class="Cmd#total_mileage_id#"></span></div>
+						<div class="col-xs-4 #total_mileage_history#" data-cmd_id="#total_mileage_id#" id="value_tile"><span class="Cmd#total_mileage_id#"></span></div>
 						<div class="col-xs-8" id="titre_tile_3"><span>{{Durée d'activité :}}</span></div>
-						<div class="col-xs-4" id="value_tile"><span class="Cmd#total_work_time_id#"></span></div>
+						<div class="col-xs-4 #total_work_time_history#" data-cmd_id="#total_work_time_id#" id="value_tile"><span class="Cmd#total_work_time_id#"></span></div>
 						<div class="col-xs-8" id="titre_tile_3"><span>{{Cycle de batterie :}}</span></div>
-						<div class="col-xs-4" id="value_tile"><span class="Cmd#bat_cycles_id#"></span></div>
+						<div class="col-xs-4 #bat_cycles_history#" data-cmd_id="#bat_cycles_id#" id="value_tile"><span class="Cmd#bat_cycles_id#"></span></div>
 						<div class="col-xs-8" id="titre_tile_3"><span>{{Temps restant lames :}}</span></div>
-						<div class="col-xs-4" id="value_tile"><span class="Cmd#blade_used_left_time_id#"></span></div>
+						<div class="col-xs-4 #blade_used_left_time_history#" data-cmd_id="#blade_used_left_time_id#" id="value_tile"><span class="Cmd#blade_used_left_time_id#"></span></div>
 					</div>
 				</div>
 
@@ -41,7 +41,7 @@
 					<div class="col-xs-3" id="icon_tile" style="height:67px;"><span class="Ico#charging_id#"></span></div>
 					<div class="col-xs-9" id="text_tile" style="height:67px;">
 						<div class="col-xs-12" id="titre_tile">{{Batterie}}</div>
-						<div class="col-xs-12" id="value_tile"><span class="Cmd#battery_id#"></span><span class="Cmd#charging_id#"></span></div>
+						<div class="col-xs-12 #battery_history#" data-cmd_id="#battery_id#" id="value_tile"><span class="Cmd#battery_id#"></span><span class="Cmd#charging_id#"></span></div>
 					</div>
 				</div>
 				
@@ -49,7 +49,7 @@
 					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-wifi"></i></div>
 					<div class="col-xs-9" id="text_tile" style="height:67px;">
 						<div class="col-xs-12" id="titre_tile">{{Connexion}}</div>
-						<div class="col-xs-12" id="value_tile"><span class="Cmd#connect_type_id#"></span><span class="Cmd#wifi_rssi_id#"></span></div>
+						<div class="col-xs-12 #wifi_rssi_history#" data-cmd_id="#wifi_rssi_id#" id="value_tile"><span class="Cmd#connect_type_id#"></span><span class="Cmd#wifi_rssi_id#"></span></div>
 					</div>
 				</div>
 				
@@ -65,7 +65,7 @@
 					<div class="col-xs-3" id="icon_tile" style="height:67px;"><i class="fas fa-ruler"></i></div>
 					<div class="col-xs-9" id="text_tile" style="height:67px;">
 						<div class="col-xs-12" id="titre_tile">{{Hauteur de lames}}</div>
-						<div class="col-xs-12" id="value_tile"><span class="Cmd#blade_height_id#"></span></div>
+						<div class="col-xs-12 #blade_height_history#" data-cmd_id="#blade_height_id#" id="value_tile"><span class="Cmd#blade_height_id#"></span></div>
 					</div>				
 				</div>
 
@@ -124,7 +124,7 @@
 					<div class="col-xs-12 mammotion_progress-container">
 						<div class="col-xs-12 mammotion_line" style="justify-content: left">
 							<span>{{Progression}}&nbsp;&nbsp;</span>
-							<span class="Cmd#work_progress_id#"></span>
+							<span class="Cmd#work_progress_id# #work_progress_history#" data-cmd_id="#work_progress_id#"></span>
 						</div>
 						<div class="mammotion_progress" id="mammotion_progress_1">
 							<div class="mammotion_progress-bar"></div>
@@ -132,15 +132,15 @@
 					</div>
 					<div class="col-xs-12" id="text_tile_2">
 						<div class="col-xs-1" id="icon_tile_2"><i class="fas fa-chart-area"></i></div>
-						<div class="col-xs-5" id="value_tile_2">{{Surface à tondre : }}<span class="Cmd#work_area_id#"></span></div>
+						<div class="col-xs-5" id="value_tile_2">{{Surface à tondre : }}<span class="Cmd#work_area_id# #work_area_history#" data-cmd_id="#work_area_id#"></span></div>
 						<div class="col-xs-1" id="icon_tile_2"><i class="fas fa-tachometer-alt"></i></div>
-						<div class="col-xs-5" id="value_tile_2">{{Vitesse : }}<span class="Cmd#speed_id#"></span></div>
+						<div class="col-xs-5" id="value_tile_2">{{Vitesse : }}<span class="Cmd#speed_id# #speed_history#" data-cmd_id="#speed_id#"></span></div>
 					</div>
 					<div class="col-xs-12" id="text_tile_2">
 						<div class="col-xs-1" id="icon_tile_2"><i class="far fa-clock"></i></div>
-						<div class="col-xs-5" id="value_tile_2">{{Temps restant : }}<span class="Cmd#left_time_id#"></span></div>
+						<div class="col-xs-5" id="value_tile_2">{{Temps restant : }}<span class="Cmd#left_time_id# #left_time_history#" data-cmd_id="#left_time_id#"></span></div>
 						<div class="col-xs-1" id="icon_tile_2"><i class="fas fa-history"></i></div>
-						<div class="col-xs-5" id="value_tile_2">{{Temps écoulé : }}<span class="Cmd#elapsed_time_id#"></span></div>
+						<div class="col-xs-5" id="value_tile_2">{{Temps écoulé : }}<span class="Cmd#elapsed_time_id# #elapsed_time_history#" data-cmd_id="#elapsed_time_id#"></span></div>
 					</div>				
 				</div>
 
