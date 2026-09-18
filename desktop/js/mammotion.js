@@ -79,20 +79,9 @@ function addCmdToTable(_cmd) {
 
 function printEqLogic(_eqLogic) {
 
-	var image = '';
-	var device = ($('.eqLogicAttr[data-l2key=device_name]').value() || '').toLowerCase();
-	['yuka', 'luba', 'spino'].forEach(function (family) {
-		if (!image && device.indexOf(family) !== -1) {
-			image = 'plugins/mammotion/data/mammotion_' + family + '.png';
-		}
-	});
- 
-	var img = document.getElementById('robot_img');
-	img.onerror = function() {
-		this.onerror = null;
-		this.src = 'plugins/mammotion/data/image_robot_not_found.png';
-	};
-	img.src = image || 'plugins/mammotion/data/image_robot_not_found.png';
+	// Image = vignette de l'équipement
+	var card = $('.eqLogicDisplayCard[data-eqLogic_id=' + _eqLogic.id + '] img');
+	document.getElementById('robot_img').src = card.length ? card.attr('src') : 'plugins/mammotion/data/image_robot_not_found.png';
 };
 
 

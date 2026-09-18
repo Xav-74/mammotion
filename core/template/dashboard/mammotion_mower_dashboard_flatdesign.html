@@ -18,7 +18,7 @@
 				<!-- Line N°1 -->
 				<div class="col-xs-6" id="tile" style="height:150px; width: 220px;">
 					<div id="picture"> 
-						<img id="img#id#"/>
+						<img id="img#id#" src="#image#" onerror="this.onerror=null;this.src='plugins/mammotion/data/image_robot_not_found.png';"/>
 					</div>
 				</div>
 				<div class="col-xs-6" id="tile" style="height:150px; width: 220px;">
@@ -190,13 +190,11 @@
 				return;
 			}
 			setTheme#id#();
-			updateImage#id#();
 			updateDisplayDashboard#id#();
 		}
 		
 		if ( $('body')[0].hasAttribute('data-theme') == true )  {
 			setTheme#id#();
-			updateImage#id#();
 			updateDisplayDashboard#id#();
 		}
 		else  {
@@ -222,24 +220,6 @@
 			document.getElementById('luba#id#').classList.remove('disabled');
 		} else {
 			document.getElementById('luba#id#').classList.add('disabled');
-		}
-
-		//----- Image
-		function updateImage#id#()  {
-			var image = '';
-			var device = ('#device_name#id##' || '').toLowerCase();
-			['yuka', 'luba', 'spino'].forEach(function (family) {
-				if (!image && device.indexOf(family) !== -1) {
-					image = 'plugins/mammotion/data/mammotion_' + family + '.png';
-				}
-			});
-		
-			var img = document.getElementById('img#id#');
-			img.onerror = function() {
-				this.onerror = null;
-				this.src = 'plugins/mammotion/data/image_robot_not_found.png';
-			};
-			img.src = image || 'plugins/mammotion/data/image_robot_not_found.png';
 		}
 
 

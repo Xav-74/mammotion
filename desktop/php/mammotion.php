@@ -67,15 +67,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 					foreach ($eqLogics as $eqLogic)	{
 						$opacity = ($eqLogic->getIsEnable()) ? '' : 'disableCard';
 						echo '<div class="eqLogicDisplayCard cursor '.$opacity.'" data-eqLogic_id="' . $eqLogic->getId() . '">';
-						$device = strtolower($eqLogic->getConfiguration('device_name'));
-						$image = $plugin->getPathImgIcon();
-						foreach (array('yuka', 'luba', 'spino') as $family) {
-							if (strpos($device, $family) !== false && file_exists(dirname(__FILE__).'/../../data/mammotion_'.$family.'.png')) {
-								$image = 'plugins/mammotion/data/mammotion_'.$family.'.png';
-								break;
-							}
-						}
-						echo '<img id="img_eq" src="' . $image . '" onerror="this.onerror=null;this.src=\'' . $plugin->getPathImgIcon() . '\'" />';
+						echo '<img id="img_eq" src="plugins/mammotion/data/' . $eqLogic->getImageFile() . '" onerror="this.onerror=null;this.src=\'' . $plugin->getPathImgIcon() . '\'" />';
 						echo '<br/>';
 						echo '<div class="name" style="line-height:20px !important">' . $eqLogic->getHumanName(true, true) . '</div>';
 						echo '</div>';

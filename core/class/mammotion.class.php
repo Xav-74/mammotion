@@ -547,6 +547,7 @@ class mammotion extends eqLogic {
 		$replace['#blade_height_max'.$this->getId().'#'] = $this->getConfiguration('blade_height_max',70);
 		$replace['#speed_min'.$this->getId().'#'] = $this->getConfiguration('speed_min',0.2);
 		$replace['#speed_max'.$this->getId().'#'] = $this->getConfiguration('speed_max',0.4);
+		$replace['#image#'] = 'plugins/mammotion/data/' . $this->getImageFile();
 				
 		// Traitement des commandes infos
 		foreach ($this->getCmd('info') as $cmd) {
@@ -698,6 +699,25 @@ class mammotion extends eqLogic {
 			$settings['speed'] = (float) $speedCmd->execCmd();
 		}
 		return $settings;
+	}
+
+	/* Image du robot : première correspondance trouvée dans le nom ou le modèle */
+	public function getImageFile()
+	{
+		$images = array(
+			'Spino'                => 'mammotion_spino_E1.webp',
+			'Yuka'                 => 'mammotion_yuka_mini_2.webp',
+			'Luba mini 2 AWD 1000' => 'mammotion_luba_mini_2_AWD_1000.webp',
+			'Luba mini'            => 'mammotion_luba_mini_2_AWD_1500.webp',
+			'Luba'                 => 'mammotion_luba_3_AWD.webp',
+		);
+		$search = $this->getConfiguration('device_name').' '.$this->getConfiguration('device_model');
+		foreach ($images as $key => $file) {
+			if (stripos($search, $key) !== false) {
+				return $file;
+			}
+		}
+		return 'image_robot_not_found.png';
 	}
 
 	/* Bloque le pilotage d'un équipement en hivernage */
