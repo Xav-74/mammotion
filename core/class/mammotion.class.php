@@ -499,6 +499,13 @@ class mammotion extends eqLogic {
 			}
 		}
 		
+		// Hivernage : commun aux tondeuses et aux robots de piscine
+		$this->createCmd('hibernation', 'Hivernage', $order, 'info', 'binary', 1, 1);
+		$order++;
+		$this->createCmd('set_hibernation', 'Basculer l\'hivernage', $order, 'action', 'other', 1, 0, [], array(), $this->getCmd(null, 'hibernation')->getId());
+		$order++;
+		$this->checkAndUpdateCmd('hibernation', $this->getConfiguration('hibernation', 0));
+
 		$this->createCmd('lastUpdate', 'Dernière mise à jour', $order, 'info', 'string');
 	}
 
@@ -797,6 +804,12 @@ class mammotionCmd extends cmd {
 					break;
 				}
 				mammotion::sendToDaemon('refresh', $device);
+				break;
+
+			case 'set_hibernation':
+				$eqLogic->setConfiguration('hibernation', $eqLogic->getConfiguration('hibernation') == 1 ? 0 : 1);
+				log::add('mammotion', 'debug', '│ Hibernation mode --> '.$eqLogic->getConfiguration('hibernation'));
+				$eqLogic->save();
 				break;
 
 			case 'start':
